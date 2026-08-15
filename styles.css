@@ -395,6 +395,162 @@ button:focus-visible {
 
 .dog-stamp { width: 98px; height: 98px; margin: 32px auto 29px; }
 .dog-stamp img, .corner-stamp img, .outcome-stamp img { width: 100%; height: 100%; object-fit: cover; }
+.sand-heart-image { object-position: 50% 52%; }
+
+.music-record {
+  position: relative;
+  cursor: pointer;
+  scale: 1;
+  translate: 0 0;
+  transition: translate 150ms var(--ease-out), scale 120ms var(--ease-out), box-shadow 220ms var(--ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.music-record-disc {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: 50%;
+  animation: music-record-spin 12s linear infinite;
+  animation-play-state: paused;
+  transform-origin: center;
+}
+
+.music-record-disc .sand-heart-image { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.music-record.is-playing {
+  box-shadow: 0 8px 23px rgba(49, 41, 31, 0.14), 0 0 0 3px rgba(194, 179, 135, 0.08);
+}
+
+.music-record.is-playing .music-record-disc { animation-play-state: running; }
+
+.music-record::after {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid rgba(38, 52, 45, 0.24);
+  border-radius: 50%;
+  background: rgba(248, 242, 231, 0.92);
+  box-shadow: 0 1px 3px rgba(49, 41, 31, 0.16);
+  content: "";
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.music-record:focus-visible {
+  outline: 2px solid rgba(75, 101, 81, 0.72);
+  outline-offset: 4px;
+}
+
+.opening-card .music-record { margin-bottom: 7px; }
+
+.music-meta {
+  min-height: 1.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+  gap: 5px;
+  color: var(--ink-faint);
+  font-size: 0.72rem;
+  font-weight: 590;
+  letter-spacing: 0.03em;
+  line-height: 1.4;
+}
+
+.music-meta-separator { opacity: 0.56; }
+
+.music-change-button {
+  min-height: 30px;
+  padding: 4px 5px;
+  border: 0;
+  border-bottom: 1px solid rgba(75, 101, 81, 0.24);
+  color: var(--sage-deep);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: 1.2;
+  transition: color 150ms var(--ease-standard), border-color 150ms var(--ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.music-change-button:focus-visible,
+.music-track-option:focus-visible {
+  outline: 2px solid rgba(75, 101, 81, 0.68);
+  outline-offset: 2px;
+}
+
+.music-track-picker {
+  width: min(100%, 270px);
+  margin: 2px auto 12px;
+  padding: 10px 4px 3px;
+  border-top: 1px solid rgba(75, 101, 81, 0.13);
+  opacity: 0;
+  text-align: left;
+  transform: translateY(4px);
+  transition: opacity 210ms var(--ease-standard), transform 230ms var(--ease-out);
+}
+
+.music-track-picker.is-open { opacity: 1; transform: translateY(0); }
+
+.music-track-group-label {
+  margin: 0 0 4px;
+  padding: 0 8px;
+  color: var(--ink-faint);
+  font-size: 0.68rem;
+  font-weight: 560;
+  letter-spacing: 0.04em;
+}
+
+.music-track-group-shared {
+  margin-top: 11px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(75, 101, 81, 0.09);
+}
+
+.music-track-note {
+  margin: 14px 8px 2px;
+  color: var(--ink-faint);
+  font-size: 0.64rem;
+  font-weight: 480;
+  letter-spacing: 0.02em;
+  line-height: 1.65;
+}
+
+.music-track-options { display: grid; gap: 1px; }
+
+.music-track-option {
+  display: grid;
+  width: 100%;
+  min-height: 44px;
+  grid-template-columns: 15px minmax(0, 1fr);
+  align-items: center;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--ink-faint);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: color 140ms var(--ease-standard), background-color 140ms var(--ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.music-track-option.is-current {
+  color: var(--sage-deep);
+  background: rgba(186, 201, 186, 0.18);
+}
+
+.music-track-check { font-size: 0.68rem; font-weight: 760; }
+.music-track-copy { display: flex; min-width: 0; align-items: baseline; gap: 4px; }
+.music-track-copy strong { font-size: 0.73rem; font-weight: 650; }
+.music-track-copy small { color: inherit; font-size: 0.66rem; font-weight: 500; }
+.music-track-artist::before { content: "· "; }
 
 .opening-actions, .final-choice-actions {
   display: flex;
@@ -430,6 +586,12 @@ button:focus-visible {
 .paper-button.wide { width: 100%; }
 .opening-actions .paper-button { width: calc(100% - 56px); }
 
+#startButton {
+  --yes-scale: 1;
+  transform: scale(var(--yes-scale));
+  transition: transform 280ms var(--ease-out), box-shadow 180ms var(--ease-standard), border-color 150ms var(--ease-standard), background-color 150ms var(--ease-standard), color 150ms var(--ease-standard), opacity 150ms var(--ease-standard);
+}
+
 .paper-button.primary {
   border-color: #758a77;
   background: var(--sage);
@@ -440,8 +602,10 @@ button:focus-visible {
 .paper-button:disabled { cursor: default; }
 
 .no-button {
+  --no-scale: 1;
   translate: var(--no-x, 0) var(--no-y, 0);
-  transition: translate 230ms var(--ease-out), transform 150ms var(--ease-out), box-shadow 150ms var(--ease-standard), border-color 150ms var(--ease-standard), opacity 150ms var(--ease-standard);
+  transform: scale(var(--no-scale));
+  transition: translate 260ms var(--ease-out), transform 250ms var(--ease-out), box-shadow 150ms var(--ease-standard), border-color 150ms var(--ease-standard), opacity 150ms var(--ease-standard);
 }
 
 .no-button.is-settled {
@@ -1279,6 +1443,11 @@ button:focus-visible {
 .question-card.is-entering .option-card:nth-child(6) { animation-delay: 300ms; }
 
 @media (hover: hover) and (pointer: fine) {
+  .music-record:hover { translate: 0 -2px; }
+
+  .music-change-button:hover { border-color: rgba(75, 101, 81, 0.54); color: var(--ink-soft); }
+  .music-track-option:hover { color: var(--ink-soft); background: rgba(186, 201, 186, 0.12); }
+
   .paper-button:not(:disabled):hover {
     border-color: var(--sage-deep);
     box-shadow: 0 10px 20px rgba(48, 40, 29, 0.13), inset 0 1px rgba(255, 255, 255, 0.55);
@@ -1289,6 +1458,14 @@ button:focus-visible {
     border-color: #647d69;
     background: #a5b6a5;
     box-shadow: 0 11px 22px rgba(71, 91, 74, 0.21), inset 0 1px rgba(255, 255, 255, 0.32);
+  }
+
+  #startButton:not(:disabled):hover {
+    transform: translateY(-2px) scale(var(--yes-scale));
+  }
+
+  .no-button:not(:disabled):hover {
+    transform: translateY(-2px) scale(var(--no-scale));
   }
 
   .option-card:not(:disabled):hover {
@@ -1326,12 +1503,20 @@ button:focus-visible {
   }
 }
 
+.music-record:active { scale: 0.97; }
 .paper-button:not(:disabled):active, .option-card:not(:disabled):active, .result-card-button:not(:disabled):active { transform: translateY(1px) scale(0.985); }
+#startButton:not(:disabled):active { transform: translateY(1px) scale(var(--yes-scale)); }
+.no-button:not(:disabled):active { transform: translateY(1px) scale(var(--no-scale)); }
 .final-note-button:not(:disabled):active { transform: translateY(1px); }
 
 .paper-button.is-soft-confirming {
   box-shadow: 0 4px 10px rgba(71, 91, 74, 0.14), inset 0 1px rgba(255, 255, 255, 0.28);
   transform: translateY(1px) scale(0.992);
+}
+
+@keyframes music-record-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes card-shell-in {
@@ -1437,6 +1622,9 @@ button:focus-visible {
   .title { font-size: clamp(2.05rem, 11vw, 3rem); }
   .subtitle { margin-top: 17px; line-height: 1.7; }
   .dog-stamp { width: 88px; height: 88px; margin-top: 26px; margin-bottom: 26px; }
+  .music-track-picker { width: min(100%, 240px); }
+  .music-track-copy { align-items: flex-start; flex-direction: column; gap: 1px; }
+  .music-track-artist::before { content: ""; }
   .opening-actions .paper-button { width: calc(100% - 44px); }
 
   .question-card, .detail-question-card { padding-top: 54px; padding-bottom: 38px; }
@@ -1547,6 +1735,8 @@ button:focus-visible {
   }
 
   .date-app::after, .paper-layer, .botanical { animation: none !important; }
+  .music-record-disc { animation: none !important; }
+  .music-track-picker { transform: none !important; }
   .invitation-card.is-entering,
   .invitation-card.is-leaving,
   .invitation-card.is-entering > *,

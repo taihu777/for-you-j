@@ -1,6 +1,43 @@
 const card = document.querySelector('#card');
 const stage = document.querySelector('.stage');
 const dateApp = document.querySelector('.date-app');
+const qixiTracks = [
+  {
+    id: 'sui-sui-nian',
+    title: '碎碎念',
+    artist: '队长',
+    src: 'assets/music/1-sui-sui-nian.mp3',
+  },
+  {
+    id: 'hong-zhi-jian',
+    title: '虹之间',
+    artist: 'en (王翊恩)',
+    src: 'assets/music/2-hong-zhi-jian.mp3',
+  },
+  {
+    id: 'wu-ming-de-ren',
+    title: '无名的人',
+    artist: 'en (王翊恩)',
+    src: 'assets/music/3-wu-ming-de-ren.mp3',
+  },
+  {
+    id: 'tian-hou',
+    title: '天后',
+    artist: 'en (王翊恩)',
+    src: 'assets/music/4-tian-hou.mp3',
+  },
+];
+let currentTrackIndex = 0;
+const qixiMusic = new Audio(qixiTracks[currentTrackIndex].src);
+
+qixiMusic.preload = 'metadata';
+qixiMusic.volume = 0.3;
+qixiMusic.loop = false;
+
+let qixiMusicHasStarted = false;
+let qixiMusicLoadFailed = false;
+let qixiMusicTogglePending = false;
+let musicPickerOpen = false;
 
 const mainActivityQuestion = {
   id: 'mainActivity',
@@ -274,10 +311,11 @@ function sanitizeStoredDraft(draft) {
 const state = sanitizeStoredDraft(window.DateInvitationStorage?.loadState());
 
 const noMoves = [
-  { x: 26, y: -6, label: '差一点' },
-  { x: -30, y: 7, label: '又差一点' },
-  { x: 22, y: -4, label: '算了' },
+  { x: 65, y: -12, label: '差一点', yesScale: 1.06, noScale: 0.92 },
+  { x: -90, y: 17, label: '又差一点', yesScale: 1.12, noScale: 0.85 },
+  { x: 110, y: -18, label: '算了', yesScale: 1.18, noScale: 0.78 },
 ];
+let suppressNoButtonClickUntil = 0;
 
 const pageAsides = {
   mainActivity: '按第一感觉选就好。',
@@ -342,6 +380,226 @@ function escapeHtml(value) {
 function formatText(value) {
   return escapeHtml(value).replaceAll('\n', '<br />');
 }
+
+function isQixiMusicPlaying() {
+  return !qixiMusic.paused && !qixiMusic.ended;
+}
+
+function getCurrentQixiTrack() {
+  return qixiTracks[currentTrackIndex];
+}
+
+function getQixiMusicHint() {
+  const track = getCurrentQixiTrack();
+  if (qixiMusicLoadFailed) return '这首歌暂时没加载出来';
+  if (qixiMusic.ended) return '听完啦 · 点一下可以再听';
+  if (isQixiMusicPlaying()) return `${track.title} · ${track.artist}`;
+  if (qixiMusicHasStarted) return '已暂停 · 点一下继续';
+  return '点一下，有首歌想给你听';
+}
+
+function renderMusicTrackOption(track, index) {
+  return `
+        <button
+          class="music-track-option${index === currentTrackIndex ? ' is-current' : ''}"
+          type="button"
+          data-track-index="${index}"
+          aria-pressed="${index === currentTrackIndex}"
+        >
+          <span class="music-track-check" aria-hidden="true">${
+            index === currentTrackIndex ? '✓' : ''
+          }</span>
+          <span class="music-track-copy">
+            <strong>${escapeHtml(track.title)}</strong>
+            <small class="music-track-artist">${escapeHtml(track.artist)}</small>
+          </span>
+        </button>`;
+}
+
+function renderMusicTrackPicker() {
+  return `
+    <section class="music-track-group" aria-label="我想先给你听的">
+      <p class="music-track-group-label">我想先给你听的</p>
+      <div class="music-track-options">
+        ${renderMusicTrackOption(qixiTracks[0], 0)}
+      </div>
+    </section>
+    <section class="music-track-group music-track-group-shared" aria-label="你之前分享给我的">
+      <p class="music-track-group-label">你之前分享给我的</p>
+      <div class="music-track-options">
+        ${qixiTracks
+          .slice(1)
+          .map((track, index) => renderMusicTrackOption(track, index + 1))
+          .join('')}
+      </div>
+    </section>
+    <p class="music-track-note">还有几首你之前分享过的，我没找到合适的版本，就先放这几首啦。</p>
+  `;
+}
+
+function syncMusicRecords() {
+  const isPlaying = isQixiMusicPlaying();
+  const currentTrack = getCurrentQixiTrack();
+  document.querySelectorAll('.music-record').forEach((record) => {
+    record.classList.toggle('is-playing', isPlaying);
+    record.setAttribute('aria-pressed', String(isPlaying));
+    record.setAttribute(
+      'aria-label',
+      `${isPlaying ? '暂停' : '播放'}《${currentTrack.title}》`,
+    );
+    record.setAttribute('title', `播放 / 暂停《${currentTrack.title}》`);
+  });
+
+  document.querySelectorAll('.music-hint').forEach((hint) => {
+    hint.textContent = getQixiMusicHint();
+  });
+
+  document.querySelectorAll('.music-change-button').forEach((button) => {
+    button.hidden = !qixiMusicHasStarted;
+    button.setAttribute('aria-expanded', String(qixiMusicHasStarted && musicPickerOpen));
+  });
+
+  document.querySelectorAll('.music-meta-separator').forEach((separator) => {
+    separator.hidden = !qixiMusicHasStarted;
+  });
+
+  document.querySelectorAll('.music-track-option').forEach((option) => {
+    const isCurrent = Number(option.dataset.trackIndex) === currentTrackIndex;
+    option.classList.toggle('is-current', isCurrent);
+    option.setAttribute('aria-pressed', String(isCurrent));
+    const check = option.querySelector('.music-track-check');
+    if (check) check.textContent = isCurrent ? '✓' : '';
+  });
+
+  document.querySelectorAll('.music-track-picker').forEach((picker) => {
+    const shouldOpen = qixiMusicHasStarted && musicPickerOpen;
+    if (!shouldOpen) {
+      picker.classList.remove('is-open');
+      picker.hidden = true;
+      return;
+    }
+
+    picker.hidden = false;
+    if (reduceMotion.matches) {
+      picker.classList.add('is-open');
+    } else {
+      requestAnimationFrame(() => {
+        if (picker.isConnected && musicPickerOpen) picker.classList.add('is-open');
+      });
+    }
+  });
+}
+
+async function toggleQixiMusic() {
+  if (qixiMusicTogglePending) return;
+
+  if (isQixiMusicPlaying()) {
+    qixiMusic.pause();
+    return;
+  }
+
+  if (qixiMusic.ended) qixiMusic.currentTime = 0;
+  qixiMusicTogglePending = true;
+
+  try {
+    await qixiMusic.play();
+    qixiMusicHasStarted = true;
+    qixiMusicLoadFailed = false;
+  } catch (error) {
+    qixiMusicLoadFailed = true;
+    console.error(`《${getCurrentQixiTrack().title}》播放失败。`, error);
+  } finally {
+    qixiMusicTogglePending = false;
+    syncMusicRecords();
+  }
+}
+
+async function selectQixiTrack(nextTrackIndex) {
+  if (
+    qixiMusicTogglePending ||
+    !Number.isInteger(nextTrackIndex) ||
+    !qixiTracks[nextTrackIndex]
+  ) {
+    return;
+  }
+
+  const changeButton = document.querySelector('.music-change-button');
+  if (nextTrackIndex === currentTrackIndex) {
+    musicPickerOpen = false;
+    syncMusicRecords();
+    changeButton?.focus({ preventScroll: true });
+    return;
+  }
+
+  qixiMusicTogglePending = true;
+  qixiMusic.pause();
+  currentTrackIndex = nextTrackIndex;
+  qixiMusicLoadFailed = false;
+  musicPickerOpen = false;
+  syncMusicRecords();
+  changeButton?.focus({ preventScroll: true });
+
+  try {
+    qixiMusic.src = getCurrentQixiTrack().src;
+    qixiMusic.currentTime = 0;
+    await qixiMusic.play();
+    qixiMusicHasStarted = true;
+    qixiMusicLoadFailed = false;
+  } catch (error) {
+    qixiMusicLoadFailed = true;
+    console.error(`《${getCurrentQixiTrack().title}》播放失败。`, error);
+  } finally {
+    qixiMusicTogglePending = false;
+    syncMusicRecords();
+  }
+}
+
+function bindMusicRecords() {
+  document.querySelectorAll('.music-record').forEach((record) => {
+    if (record.dataset.musicBound === 'true') return;
+
+    record.dataset.musicBound = 'true';
+    record.addEventListener('click', toggleQixiMusic);
+    record.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      toggleQixiMusic();
+    });
+  });
+
+  document.querySelectorAll('.music-change-button').forEach((button) => {
+    if (button.dataset.musicPickerBound === 'true') return;
+
+    button.dataset.musicPickerBound = 'true';
+    button.addEventListener('click', () => {
+      musicPickerOpen = !musicPickerOpen;
+      syncMusicRecords();
+    });
+  });
+
+  document.querySelectorAll('.music-track-option').forEach((option) => {
+    if (option.dataset.musicPickerBound === 'true') return;
+
+    option.dataset.musicPickerBound = 'true';
+    option.addEventListener('click', () => {
+      selectQixiTrack(Number(option.dataset.trackIndex));
+    });
+  });
+
+  syncMusicRecords();
+}
+
+qixiMusic.addEventListener('play', () => {
+  qixiMusicHasStarted = true;
+  qixiMusicLoadFailed = false;
+  syncMusicRecords();
+});
+qixiMusic.addEventListener('pause', syncMusicRecords);
+qixiMusic.addEventListener('ended', syncMusicRecords);
+qixiMusic.addEventListener('error', () => {
+  qixiMusicLoadFailed = true;
+  syncMusicRecords();
+});
 
 function clearTimers(timers) {
   timers.forEach((timer) => window.clearTimeout(timer));
@@ -806,6 +1064,7 @@ function render() {
 
   showPageAside(screen.id);
   showStageNote(screen.id);
+  bindMusicRecords();
 
   card.classList.remove('is-entering', 'is-leaving');
   requestAnimationFrame(() => card.classList.add('is-entering'));
@@ -849,9 +1108,32 @@ function renderOpening() {
     <p class="eyebrow">先卖个关子</p>
     <h1 class="title">有个东西想给你看看。</h1>
     <p class="subtitle">大概两分钟。</p>
-    <figure class="dog-stamp" aria-label="一只歪着出现的小狗">
-      <img src="assets/dog-avatar.png" alt="可爱的小狗" />
+    <figure
+      class="dog-stamp music-record"
+      role="button"
+      tabindex="0"
+      aria-pressed="false"
+      aria-label="播放《碎碎念》"
+      title="播放 / 暂停《碎碎念》"
+    >
+      <span class="music-record-disc">
+        <img class="sand-heart-image" src="assets/sand-heart.jpg" alt="沙地上的爱心" />
+      </span>
     </figure>
+    <div class="music-meta">
+      <span class="music-hint" aria-live="polite">点一下，有首歌想给你听</span>
+      <span class="music-meta-separator" aria-hidden="true" hidden>·</span>
+      <button
+        class="music-change-button"
+        type="button"
+        aria-expanded="false"
+        aria-controls="musicTrackPicker"
+        hidden
+      >换一首</button>
+    </div>
+    <div class="music-track-picker" id="musicTrackPicker" aria-label="歌曲选择" hidden>
+      ${renderMusicTrackPicker()}
+    </div>
     <div class="opening-actions">
       <button class="paper-button primary wide" id="startButton" type="button">看看 👀</button>
       <button class="paper-button secondary no-button" id="noButton" type="button">算了</button>
@@ -866,11 +1148,27 @@ function renderOpening() {
 }
 
 function handleNoHover(event) {
-  if (event.pointerType === 'touch' || state.noCount >= noMoves.length || state.noSettling) return;
-  dodgeNoButton(event.currentTarget);
+  if (
+    event.pointerType === 'touch' ||
+    state.noCount >= noMoves.length ||
+    state.noSettling ||
+    performance.now() < suppressNoButtonClickUntil
+  ) {
+    return;
+  }
+
+  if (dodgeNoButton(event.currentTarget)) {
+    suppressNoButtonClickUntil = performance.now() + 360;
+  }
 }
 
 function handleNoClick(event) {
+  if (performance.now() < suppressNoButtonClickUntil) {
+    event.preventDefault();
+    suppressNoButtonClickUntil = 0;
+    return;
+  }
+
   if (state.noCount < noMoves.length) {
     event.preventDefault();
     dodgeNoButton(event.currentTarget);
@@ -881,12 +1179,36 @@ function handleNoClick(event) {
 }
 
 function dodgeNoButton(button) {
-  if (state.noCount >= noMoves.length || state.noSettling) return;
+  if (state.noCount >= noMoves.length || state.noSettling) return false;
   const move = noMoves[state.noCount];
-  const horizontalRoom = Math.max(0, (button.parentElement.clientWidth - button.offsetWidth) / 2 - 6);
-  const safeX = Math.max(-horizontalRoom, Math.min(horizontalRoom, move.x));
+  const startButton = card.querySelector('#startButton');
+  const actions = button.parentElement;
+  const cardRect = card.getBoundingClientRect();
+  const actionsRect = actions.getBoundingClientRect();
+  const safeMargin = Math.min(22, Math.max(16, cardRect.width * 0.04));
+  const visualButtonWidth = button.offsetWidth * move.noScale;
+  const visualButtonHeight = button.offsetHeight * move.noScale;
+  const buttonCenterX = actionsRect.left + button.offsetLeft + button.offsetWidth / 2;
+  const buttonCenterY = actionsRect.top + button.offsetTop + button.offsetHeight / 2;
+  const minX = cardRect.left + safeMargin + visualButtonWidth / 2 - buttonCenterX;
+  const maxX = cardRect.right - safeMargin - visualButtonWidth / 2 - buttonCenterX;
+  const movementTop = Math.max(cardRect.top + safeMargin, actionsRect.top + 4);
+  const movementBottom = Math.min(cardRect.bottom - safeMargin, actionsRect.bottom - 16);
+  const minY = movementTop + visualButtonHeight / 2 - buttonCenterY;
+  const maxY = movementBottom - visualButtonHeight / 2 - buttonCenterY;
+  const safeX = minX <= maxX ? Math.max(minX, Math.min(maxX, move.x)) : 0;
+  const safeY = minY <= maxY ? Math.max(minY, Math.min(maxY, move.y)) : 0;
 
-  button.style.translate = `${safeX}px ${move.y}px`;
+  if (startButton) {
+    const maxYesScale = Math.max(
+      1,
+      (cardRect.width - safeMargin * 2) / startButton.offsetWidth,
+    );
+    startButton.style.setProperty('--yes-scale', String(Math.min(move.yesScale, maxYesScale)));
+  }
+
+  button.style.setProperty('--no-scale', String(move.noScale));
+  button.style.translate = `${safeX}px ${safeY}px`;
   button.textContent = move.label;
   state.noCount += 1;
 
@@ -900,9 +1222,12 @@ function dodgeNoButton(button) {
       button.classList.add('is-settled');
       button.disabled = false;
       state.noSettling = false;
+      suppressNoButtonClickUntil = 0;
       card.querySelector('#noNote').textContent = '好啦，这次不跑了。';
     }, 260);
   }
+
+  return true;
 }
 
 function recoverFromMissingQuestion(screen) {
@@ -1118,8 +1443,17 @@ function renderInvitation() {
       <button class="paper-button primary wide" id="maybeYes" type="button">可以啊</button>
       <button class="paper-button secondary wide" id="later" type="button">到时候再说</button>
     </div>
-    <figure class="dog-stamp corner-stamp" aria-hidden="true">
-      <img src="assets/dog-avatar.png" alt="" />
+    <figure
+      class="dog-stamp corner-stamp music-record"
+      role="button"
+      tabindex="0"
+      aria-pressed="false"
+      aria-label="播放《碎碎念》"
+      title="播放 / 暂停《碎碎念》"
+    >
+      <span class="music-record-disc">
+        <img class="sand-heart-image" src="assets/sand-heart.jpg" alt="" />
+      </span>
     </figure>
   `;
 
@@ -1243,8 +1577,8 @@ function renderReview() {
           <p class="result-card-status" id="resultCardStatus" role="status" aria-live="polite"></p>
           <button class="restart-button" id="restartInvitation" type="button">重新填写一次</button>
           <div class="success-epilogue" aria-live="off">
-            <p class="success-epilogue-first">谢谢你认真走到这里。</p>
-            <p class="success-epilogue-second">这大概就是我做这个网页最想看到的画面。</p>
+            <p class="success-epilogue-first">谢谢你愿意认真看到这里。</p>
+            <p class="success-epilogue-second">能看到你一路走到这里，大概就是我做这个网页时最期待的事。</p>
           </div>
           <button class="final-note-button" id="openQixiFinal" type="button">还有一句</button>`
         : `<div class="review-actions">
@@ -1372,11 +1706,21 @@ function showOutcome(type) {
       <h1 class="title">${escapeHtml(outcome.title)}</h1>
       ${outcome.detail ? `<p class="subtitle">${formatText(outcome.detail)}</p>` : ''}
       ${outcome.ending ? `<p class="outcome-ending">${escapeHtml(outcome.ending)}</p>` : ''}
-      <figure class="dog-stamp outcome-stamp" aria-hidden="true">
-        <img src="assets/dog-avatar.png" alt="" />
+      <figure
+        class="dog-stamp outcome-stamp music-record"
+        role="button"
+        tabindex="0"
+        aria-pressed="false"
+        aria-label="播放《碎碎念》"
+        title="播放 / 暂停《碎碎念》"
+      >
+        <span class="music-record-disc">
+          <img class="sand-heart-image" src="assets/sand-heart.jpg" alt="" />
+        </span>
       </figure>
     `;
     state.transitioning = false;
+    bindMusicRecords();
     requestAnimationFrame(() => card.classList.add('is-entering'));
   }, 260);
 }

@@ -15,7 +15,7 @@
 ├── supabase/
 │   └── schema.sql            # 建表、RLS、INSERT policy 与权限
 └── assets/
-    └── dog-avatar.png
+    └── sand-heart.jpg
 ```
 
 ## 本地草稿
