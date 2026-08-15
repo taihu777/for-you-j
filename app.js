@@ -1,5 +1,6 @@
 const card = document.querySelector('#card');
 const stage = document.querySelector('.stage');
+const dateApp = document.querySelector('.date-app');
 
 const mainActivityQuestion = {
   id: 'mainActivity',
@@ -308,11 +309,26 @@ const endingCopies = {
 };
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const qixiLightPoints = [
+  { x: 9, y: 13, size: 7, opacity: 0.28, blur: 2, duration: 18, delay: -4, dx: 12, dy: -15, tone: 'straw' },
+  { x: 79, y: 10, size: 9, opacity: 0.22, blur: 4, duration: 23, delay: -11, dx: -14, dy: 9, tone: 'sage' },
+  { x: 25, y: 29, size: 5, opacity: 0.34, blur: 1, duration: 15, delay: -6, dx: 10, dy: -9, tone: 'straw' },
+  { x: 91, y: 34, size: 7, opacity: 0.24, blur: 3, duration: 21, delay: -14, dx: -11, dy: -16, tone: 'sage' },
+  { x: 10, y: 59, size: 11, opacity: 0.2, blur: 4, duration: 24, delay: -9, dx: 16, dy: 8, tone: 'straw' },
+  { x: 88, y: 63, size: 5, opacity: 0.32, blur: 2, duration: 17, delay: -2, dx: -9, dy: 14, tone: 'sage' },
+  { x: 20, y: 80, size: 8, opacity: 0.25, blur: 2, duration: 20, delay: -13, dx: 13, dy: -12, tone: 'sage' },
+  { x: 73, y: 86, size: 10, opacity: 0.2, blur: 4, duration: 22, delay: -7, dx: -17, dy: 10, tone: 'straw' },
+  { x: 5, y: 91, size: 5, opacity: 0.3, blur: 1, duration: 16, delay: -10, dx: 9, dy: -10, tone: 'straw' },
+  { x: 94, y: 78, size: 7, opacity: 0.24, blur: 3, duration: 19, delay: -5, dx: -12, dy: 8, tone: 'sage' },
+  { x: 66, y: 23, size: 5, opacity: 0.29, blur: 2, duration: 14, delay: -8, dx: 10, dy: -13, tone: 'sage' },
+  { x: 38, y: 93, size: 12, opacity: 0.18, blur: 4, duration: 24, delay: -16, dx: 15, dy: -8, tone: 'straw' },
+];
 let microReactionTimers = [];
 let successEpilogueTimers = [];
 let easterEggTapCount = 0;
 let easterEggResetTimer = null;
 let easterEggRevealed = false;
+let qixiFinalTransitioning = false;
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -447,6 +463,75 @@ function showSuccessEpilogue() {
     window.setTimeout(() => firstLine?.classList.add('is-visible'), 3400),
     window.setTimeout(() => secondLine?.classList.add('is-visible'), 5900),
   );
+}
+
+function renderQixiLightPoints() {
+  return qixiLightPoints
+    .map(
+      (point) => `<span class="qixi-light-point qixi-light-point-${point.tone}" style="--point-x:${
+        point.x
+      }%;--point-y:${point.y}%;--point-size:${point.size}px;--point-opacity:${
+        point.opacity
+      };--point-blur:${point.blur}px;--point-duration:${point.duration}s;--point-delay:${
+        point.delay
+      }s;--point-drift-x:${point.dx}px;--point-drift-y:${point.dy}px"></span>`,
+    )
+    .join('');
+}
+
+function renderQixiFinal() {
+  dateApp?.classList.remove('is-qixi-transitioning');
+  dateApp?.classList.add('is-qixi-final');
+
+  stage.querySelector('.qixi-scene-effects')?.remove();
+  const sceneEffects = document.createElement('div');
+  sceneEffects.className = 'qixi-scene-effects';
+  sceneEffects.setAttribute('aria-hidden', 'true');
+  sceneEffects.innerHTML = `
+    <div class="qixi-bokeh-field">
+      <span class="qixi-bokeh qixi-bokeh-one"></span>
+      <span class="qixi-bokeh qixi-bokeh-two"></span>
+      <span class="qixi-bokeh qixi-bokeh-three"></span>
+    </div>
+    <div class="qixi-light-field">
+      ${renderQixiLightPoints()}
+    </div>
+  `;
+  stage.insertBefore(sceneEffects, card);
+
+  card.className = 'invitation-card qixi-final-card';
+  card.dataset.screen = 'qixi-final';
+  card.tabIndex = -1;
+  card.innerHTML = `
+    <div class="qixi-final-message">
+      <p class="qixi-final-copy">
+        <span class="qixi-final-prefix">好啦，</span>
+        <span class="qixi-final-main">七夕快乐。</span>
+      </p>
+    </div>
+  `;
+
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  card.focus({ preventScroll: true });
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      sceneEffects.classList.add('is-visible');
+      card.classList.add('is-visible');
+    }),
+  );
+}
+
+function openQixiFinal(event) {
+  if (!state.submitted || qixiFinalTransitioning) return;
+
+  qixiFinalTransitioning = true;
+  event.currentTarget.disabled = true;
+  clearSuccessEpilogueTimers();
+  dateApp?.classList.add('is-qixi-transitioning');
+  card.classList.remove('is-entering');
+  card.classList.add('is-qixi-leaving');
+
+  window.setTimeout(renderQixiFinal, reduceMotion.matches ? 0 : 420);
 }
 
 function triggerEasterEgg() {
@@ -1160,7 +1245,8 @@ function renderReview() {
           <div class="success-epilogue" aria-live="off">
             <p class="success-epilogue-first">谢谢你认真走到这里。</p>
             <p class="success-epilogue-second">这大概就是我做这个网页最想看到的画面。</p>
-          </div>`
+          </div>
+          <button class="final-note-button" id="openQixiFinal" type="button">还有一句</button>`
         : `<div class="review-actions">
             <button class="paper-button primary wide" id="confirmSubmit" type="button">确认发送</button>
             <button class="paper-button secondary wide" id="backToAnswers" type="button">返回修改答案</button>
@@ -1181,6 +1267,7 @@ function renderReview() {
   card.querySelector('#backToAnswers')?.addEventListener('click', returnToAnswers);
   card.querySelector('#saveResultCard')?.addEventListener('click', saveResultCard);
   card.querySelector('#restartInvitation')?.addEventListener('click', restartInvitation);
+  card.querySelector('#openQixiFinal')?.addEventListener('click', openQixiFinal);
   if (state.submitted) showSuccessEpilogue();
 }
 

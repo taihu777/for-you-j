@@ -59,6 +59,7 @@ button:focus-visible {
   place-items: center;
   isolation: isolate;
   padding: clamp(18px, 3vw, 42px);
+  transition: background-color 720ms var(--ease-standard);
 }
 
 .date-app::before {
@@ -73,6 +74,7 @@ button:focus-visible {
     linear-gradient(rgba(69, 58, 43, 0.018) 1px, transparent 1px);
   background-size: 24px 24px;
   mask-image: linear-gradient(to bottom, black, transparent 88%);
+  transition: opacity 520ms var(--ease-standard);
 }
 
 .date-app::after {
@@ -88,6 +90,7 @@ button:focus-visible {
   pointer-events: none;
   transform: translate3d(-24vw, -18vh, 0);
   animation: ambient-light-drift 18s var(--ease-standard) infinite alternate;
+  transition: opacity 560ms var(--ease-standard);
 }
 
 .stage {
@@ -192,6 +195,73 @@ button:focus-visible {
 .botanical span:nth-child(3) { top: 72px; left: 14px; transform: rotate(155deg); }
 .botanical span:nth-child(4) { top: 105px; left: 42px; transform: rotate(-28deg); }
 .botanical span:nth-child(5) { top: 132px; left: 15px; transform: rotate(158deg); }
+
+.date-app.is-qixi-transitioning,
+.date-app.is-qixi-final {
+  background-color: #f7f1e6;
+}
+
+.date-app.is-qixi-transitioning::before,
+.date-app.is-qixi-final::before {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 50% 43%, rgba(232, 216, 151, 0.2), rgba(232, 216, 151, 0.055) 28%, transparent 58%),
+    radial-gradient(circle at 88% 78%, rgba(156, 175, 157, 0.13), transparent 38%),
+    radial-gradient(circle at 10% 18%, rgba(218, 128, 102, 0.055), transparent 31%);
+  background-size: auto;
+  mask-image: none;
+}
+
+.date-app.is-qixi-transitioning::after,
+.date-app.is-qixi-final::after {
+  opacity: 0;
+  animation: none;
+}
+
+.date-app.is-qixi-transitioning .paper-layer,
+.date-app.is-qixi-final .paper-layer {
+  opacity: 0;
+  animation: none;
+  transition: opacity 620ms var(--ease-standard), transform 720ms var(--ease-out);
+}
+
+.date-app.is-qixi-transitioning .paper-layer-one,
+.date-app.is-qixi-final .paper-layer-one {
+  transform: rotate(0.85deg) translate3d(0, -6px, 0) scale(0.994);
+}
+
+.date-app.is-qixi-transitioning .paper-layer-two,
+.date-app.is-qixi-final .paper-layer-two {
+  transform: rotate(-0.55deg) translate3d(0, 6px, 0) scale(0.994);
+}
+
+.date-app.is-qixi-transitioning .botanical,
+.date-app.is-qixi-final .botanical {
+  opacity: 0;
+  animation: none;
+  transition: opacity 560ms var(--ease-standard), transform 680ms var(--ease-out);
+}
+
+.date-app.is-qixi-transitioning .botanical-left,
+.date-app.is-qixi-final .botanical-left {
+  transform: translate3d(-7px, -9px, 0) rotate(-13deg) scale(0.98);
+}
+
+.date-app.is-qixi-transitioning .botanical-right,
+.date-app.is-qixi-final .botanical-right {
+  transform: translate3d(7px, 9px, 0) scaleX(-1) rotate(-11deg) scale(0.98);
+}
+
+.date-app.is-qixi-transitioning .botanical-hit-area,
+.date-app.is-qixi-final .botanical-hit-area {
+  pointer-events: none;
+}
+
+.date-app.is-qixi-transitioning .easter-egg-copy,
+.date-app.is-qixi-final .easter-egg-copy {
+  opacity: 0;
+  transition: opacity 260ms var(--ease-standard);
+}
 
 .invitation-card {
   position: relative;
@@ -843,6 +913,214 @@ button:focus-visible {
   transform: translate3d(0, 0, 0);
 }
 
+.final-note-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  margin: 2px auto 0;
+  padding: 8px 10px;
+  border: 0;
+  color: rgba(38, 52, 45, 0.46);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 560;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  transition: color 150ms var(--ease-standard), opacity 150ms var(--ease-standard), transform 150ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.final-note-button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.review-card.is-qixi-leaving {
+  pointer-events: none;
+  animation: qixi-success-out 420ms var(--ease-standard) both;
+}
+
+.qixi-final-card {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: none;
+  min-height: min(820px, calc(100dvh - 44px));
+  overflow: visible;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(34px, 7vw, 62px);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  opacity: 1;
+  transform: none;
+  transition: none;
+  will-change: auto;
+}
+
+.qixi-final-card.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.qixi-scene-effects {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 520ms var(--ease-standard) 100ms;
+}
+
+.qixi-scene-effects.is-visible { opacity: 1; }
+
+.qixi-scene-effects::after {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: min(72vmax, 920px);
+  height: min(72vmax, 920px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 216, 151, 0.11), rgba(232, 216, 151, 0.035) 46%, transparent 72%);
+  content: "";
+  filter: blur(38px);
+  opacity: 0.52;
+  pointer-events: none;
+  transform: translate3d(-50%, -53%, 0) scale(0.99);
+  animation: qixi-glow-breathe 16s ease-in-out infinite alternate;
+}
+
+.qixi-light-field,
+.qixi-bokeh-field {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.qixi-light-point {
+  position: absolute;
+  top: var(--point-y);
+  left: var(--point-x);
+  width: var(--point-size);
+  height: var(--point-size);
+  border-radius: 50%;
+  filter: blur(var(--point-blur));
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 720ms var(--ease-standard) 180ms;
+  animation: qixi-point-drift var(--point-duration) ease-in-out var(--point-delay) infinite alternate;
+}
+
+.qixi-light-point-straw { background: rgba(232, 216, 151, 0.9); }
+.qixi-light-point-sage { background: rgba(156, 175, 157, 0.82); }
+
+.qixi-scene-effects.is-visible .qixi-light-point {
+  opacity: var(--point-opacity);
+}
+
+.qixi-bokeh {
+  position: absolute;
+  width: var(--bokeh-size);
+  height: var(--bokeh-size);
+  border-radius: 50%;
+  filter: blur(var(--bokeh-blur));
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 900ms var(--ease-standard) 140ms;
+  animation: qixi-bokeh-drift var(--bokeh-duration) ease-in-out var(--bokeh-delay) infinite alternate;
+}
+
+.qixi-bokeh-one {
+  --bokeh-size: 96px;
+  --bokeh-blur: 34px;
+  --bokeh-duration: 22s;
+  --bokeh-delay: -7s;
+  --bokeh-drift-x: 12px;
+  --bokeh-drift-y: -9px;
+  top: 13%;
+  left: 10%;
+  background: rgba(232, 216, 151, 0.72);
+}
+
+.qixi-bokeh-two {
+  --bokeh-size: 138px;
+  --bokeh-blur: 44px;
+  --bokeh-duration: 27s;
+  --bokeh-delay: -16s;
+  --bokeh-drift-x: -15px;
+  --bokeh-drift-y: 11px;
+  right: 8%;
+  bottom: 18%;
+  background: rgba(156, 175, 157, 0.58);
+}
+
+.qixi-bokeh-three {
+  --bokeh-size: 164px;
+  --bokeh-blur: 50px;
+  --bokeh-duration: 30s;
+  --bokeh-delay: -11s;
+  --bokeh-drift-x: 10px;
+  --bokeh-drift-y: 13px;
+  bottom: -2%;
+  left: 25%;
+  background: rgba(218, 128, 102, 0.42);
+}
+
+.qixi-scene-effects.is-visible .qixi-bokeh-one { opacity: 0.075; }
+.qixi-scene-effects.is-visible .qixi-bokeh-two { opacity: 0.065; }
+.qixi-scene-effects.is-visible .qixi-bokeh-three { opacity: 0.045; }
+
+.qixi-final-message {
+  position: relative;
+  z-index: 2;
+}
+
+.qixi-final-copy {
+  display: grid;
+  margin: 0;
+  gap: 10px;
+  line-height: 1.45;
+}
+
+.qixi-final-prefix,
+.qixi-final-main {
+  display: block;
+  opacity: 0;
+  transform: translate3d(0, 5px, 0);
+}
+
+.qixi-final-prefix {
+  color: rgba(38, 52, 45, 0.65);
+  font-size: clamp(0.94rem, 2vw, 1.02rem);
+  font-weight: 560;
+  letter-spacing: 0.055em;
+  transition: opacity 640ms var(--ease-standard) 460ms, transform 720ms var(--ease-out) 460ms;
+}
+
+.qixi-final-main {
+  color: var(--ink);
+  font-size: clamp(1.55rem, 4vw, 1.95rem);
+  font-weight: 680;
+  letter-spacing: 0.045em;
+  transition: opacity 700ms var(--ease-standard) 660ms, transform 780ms var(--ease-out) 660ms;
+}
+
+.qixi-final-card.is-visible .qixi-final-prefix,
+.qixi-final-card.is-visible .qixi-final-main {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
 .easter-egg-copy {
   position: absolute;
   z-index: 5;
@@ -1041,9 +1319,15 @@ button:focus-visible {
     color: var(--ink);
     transform: translateY(-1px);
   }
+
+  .final-note-button:not(:disabled):hover {
+    color: var(--ink-faint);
+    transform: translateY(-1px);
+  }
 }
 
 .paper-button:not(:disabled):active, .option-card:not(:disabled):active, .result-card-button:not(:disabled):active { transform: translateY(1px) scale(0.985); }
+.final-note-button:not(:disabled):active { transform: translateY(1px); }
 
 .paper-button.is-soft-confirming {
   box-shadow: 0 4px 10px rgba(71, 91, 74, 0.14), inset 0 1px rgba(255, 255, 255, 0.28);
@@ -1097,6 +1381,26 @@ button:focus-visible {
   to { transform: translate3d(28vw, 22vh, 0) scale(1.04); }
 }
 
+@keyframes qixi-success-out {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to { opacity: 0; transform: translate3d(0, -4px, 0); }
+}
+
+@keyframes qixi-glow-breathe {
+  from { opacity: 0.48; transform: translate3d(-50%, -53%, 0) scale(0.99); }
+  to { opacity: 0.56; transform: translate3d(-50%, -53%, 0) scale(1.01); }
+}
+
+@keyframes qixi-point-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(var(--point-drift-x), var(--point-drift-y), 0); }
+}
+
+@keyframes qixi-bokeh-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(var(--bokeh-drift-x), var(--bokeh-drift-y), 0); }
+}
+
 @media (max-width: 640px) {
   .date-app { padding: 8px; }
   .date-app::after { opacity: 0.08; animation: none; transform: translate3d(-18vw, -12vh, 0); }
@@ -1109,6 +1413,16 @@ button:focus-visible {
   .botanical-left { left: -27px; }
   .botanical-right { right: -27px; transform: scaleX(-1) scale(0.78) rotate(-11deg); }
   .botanical-hit-area { left: -4px; width: 48px; height: 104px; }
+
+  .date-app.is-qixi-transitioning .botanical-left,
+  .date-app.is-qixi-final .botanical-left {
+    transform: translate3d(-6px, -7px, 0) scale(0.77) rotate(-13deg);
+  }
+
+  .date-app.is-qixi-transitioning .botanical-right,
+  .date-app.is-qixi-final .botanical-right {
+    transform: translate3d(6px, 7px, 0) scaleX(-1) scale(0.77) rotate(-11deg);
+  }
 
   .invitation-card {
     width: 100%;
@@ -1185,6 +1499,15 @@ button:focus-visible {
   .review-section-intro { font-size: 0.67rem; }
   .success-epilogue { margin-top: 25px; }
   .easter-egg-copy { right: 24px; bottom: 22px; }
+  .qixi-final-card {
+    min-height: calc(100dvh - 36px);
+    padding: 28px 24px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .qixi-final-message { transform: translateY(-4dvh); }
 
   .review-answer-row {
     align-items: flex-start;
@@ -1231,5 +1554,22 @@ button:focus-visible {
   .transition-card.is-entering *,
   .micro-reaction,
   .success-epilogue p,
-  .easter-egg-copy p { transform: none !important; }
+  .easter-egg-copy p,
+  .qixi-final-card,
+  .qixi-final-prefix,
+  .qixi-final-main { transform: none !important; }
+
+  .qixi-final-card,
+  .qixi-scene-effects,
+  .qixi-final-prefix,
+  .qixi-final-main,
+  .qixi-light-point { opacity: 1 !important; transition: none !important; }
+  .qixi-bokeh { transition: none !important; }
+  .qixi-bokeh-one { opacity: 0.075 !important; }
+  .qixi-bokeh-two { opacity: 0.065 !important; }
+  .qixi-bokeh-three { opacity: 0.045 !important; }
+  .qixi-light-point { opacity: var(--point-opacity) !important; }
+  .qixi-scene-effects::after,
+  .qixi-light-point,
+  .qixi-bokeh { animation: none !important; }
 }
