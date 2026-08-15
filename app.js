@@ -1,4 +1,5 @@
 const card = document.querySelector('#card');
+const stage = document.querySelector('.stage');
 
 const mainActivityQuestion = {
   id: 'mainActivity',
@@ -277,6 +278,42 @@ const noMoves = [
   { x: 22, y: -4, label: '算了' },
 ];
 
+const pageAsides = {
+  mainActivity: '按第一感觉选就好。',
+  firstMeeting: '这一题不用想太久。',
+  afterNatural: '其实没有标准答案。',
+};
+
+const stageNotes = {
+  transition: '已经走了一半啦。',
+  closingIf: '差一点就到最后了。',
+};
+
+const microReactionCopies = {
+  mainActivity: {
+    movie: '原来是这个。',
+    food: '好，记住了。',
+    walk: '嗯，慢慢走。',
+    chat: '这个也很好。',
+  },
+  firstMeeting: '好像知道一点了。',
+  afterNatural: '收到啦。',
+};
+
+const endingCopies = {
+  movie: '那我先偷偷期待一下那场电影。',
+  food: '那看来得认真挑一家好吃的了。',
+  walk: '那就留一点时间，慢慢走。',
+  chat: '那我应该准备好多听一点。',
+};
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let microReactionTimers = [];
+let successEpilogueTimers = [];
+let easterEggTapCount = 0;
+let easterEggResetTimer = null;
+let easterEggRevealed = false;
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -288,6 +325,129 @@ function escapeHtml(value) {
 
 function formatText(value) {
   return escapeHtml(value).replaceAll('\n', '<br />');
+}
+
+function clearTimers(timers) {
+  timers.forEach((timer) => window.clearTimeout(timer));
+  timers.length = 0;
+}
+
+function showMicroReaction(questionId, value) {
+  const configuredCopy = microReactionCopies[questionId];
+  const copy =
+    typeof configuredCopy === 'string' ? configuredCopy : configuredCopy?.[value] || '';
+  if (!copy || !stage) return;
+
+  clearTimers(microReactionTimers);
+  stage.querySelector('.micro-reaction')?.remove();
+
+  const reaction = document.createElement('p');
+  reaction.className = 'micro-reaction';
+  reaction.textContent = copy;
+  reaction.setAttribute('aria-hidden', 'true');
+  stage.append(reaction);
+
+  if (reduceMotion.matches) {
+    reaction.classList.add('is-visible');
+    microReactionTimers.push(window.setTimeout(() => reaction.remove(), 1200));
+    return;
+  }
+
+  requestAnimationFrame(() => reaction.classList.add('is-visible'));
+  microReactionTimers.push(
+    window.setTimeout(() => reaction.classList.remove('is-visible'), 1000),
+    window.setTimeout(() => reaction.remove(), 1550),
+  );
+}
+
+function showPageAside(screenId) {
+  const copy = pageAsides[screenId];
+  const header = card.querySelector('.question-header');
+  if (!copy || !header) return;
+
+  const aside = document.createElement('p');
+  aside.className = 'page-aside';
+  aside.textContent = copy;
+  header.append(aside);
+}
+
+function showStageNote(screenId) {
+  const copy = stageNotes[screenId];
+  const action = card.querySelector('.single-action');
+  if (!copy || !action) return;
+
+  const note = document.createElement('p');
+  note.className = 'stage-note';
+  note.textContent = copy;
+  action.before(note);
+}
+
+function getEndingCopy(activity) {
+  return endingCopies[activity] || '那就先把这次认真地收好。';
+}
+
+function clearSuccessEpilogueTimers() {
+  clearTimers(successEpilogueTimers);
+}
+
+function showSuccessEpilogue() {
+  const epilogue = card.querySelector('.success-epilogue');
+  if (!epilogue) return;
+
+  const firstLine = epilogue.querySelector('.success-epilogue-first');
+  const secondLine = epilogue.querySelector('.success-epilogue-second');
+  if (reduceMotion.matches) {
+    firstLine?.classList.add('is-visible');
+    secondLine?.classList.add('is-visible');
+    return;
+  }
+
+  successEpilogueTimers.push(
+    window.setTimeout(() => firstLine?.classList.add('is-visible'), 3400),
+    window.setTimeout(() => secondLine?.classList.add('is-visible'), 5900),
+  );
+}
+
+function triggerEasterEgg() {
+  if (easterEggRevealed || !stage) return;
+
+  window.clearTimeout(easterEggResetTimer);
+  easterEggTapCount += 1;
+  if (easterEggTapCount < 5) {
+    easterEggResetTimer = window.setTimeout(() => {
+      easterEggTapCount = 0;
+    }, 2400);
+    return;
+  }
+
+  easterEggRevealed = true;
+  const message = document.createElement('div');
+  message.className = 'easter-egg-copy';
+  message.setAttribute('aria-live', 'polite');
+  message.innerHTML = `
+    <p class="easter-egg-first">你居然真的发现这里了。</p>
+    <p class="easter-egg-second">好吧，这句话本来就是留给你的。</p>
+  `;
+  stage.append(message);
+
+  const firstLine = message.querySelector('.easter-egg-first');
+  const secondLine = message.querySelector('.easter-egg-second');
+  requestAnimationFrame(() => firstLine?.classList.add('is-visible'));
+  window.setTimeout(
+    () => secondLine?.classList.add('is-visible'),
+    reduceMotion.matches ? 0 : 2200,
+  );
+  window.setTimeout(() => message.remove(), reduceMotion.matches ? 5000 : 7800);
+}
+
+function bindEasterEgg() {
+  document.querySelector('.botanical-left')?.addEventListener('click', triggerEasterEgg);
+}
+
+function showSubmitFeedback(event) {
+  const button = event.currentTarget;
+  button.classList.add('is-soft-confirming');
+  window.setTimeout(() => button.classList.remove('is-soft-confirming'), 420);
 }
 
 function indexOfScreen(id) {
@@ -517,6 +677,9 @@ function render() {
   if (screen.kind === 'closing') renderClosing(screen);
   if (screen.kind === 'invitation') renderInvitation();
   if (screen.kind === 'review') renderReview();
+
+  showPageAside(screen.id);
+  showStageNote(screen.id);
 
   card.classList.remove('is-entering', 'is-leaving');
   requestAnimationFrame(() => card.classList.add('is-entering'));
@@ -768,6 +931,7 @@ function selectOption(question, button) {
     saveState();
   }
 
+  showMicroReaction(question.id, button.dataset.value);
   advance(360, 110);
 }
 
@@ -873,6 +1037,7 @@ function renderReviewAnswerRow(questionId, isShared) {
 }
 
 function renderReview() {
+  clearSuccessEpilogueTimers();
   ensureSubmissionId();
   card.classList.add('review-card');
 
@@ -901,6 +1066,7 @@ function renderReview() {
           <h2 id="sharedReviewTitle">你准备告诉我的</h2>
           <span>会发送</span>
         </div>
+        <p class="review-section-intro">下面这些，是你最后决定让我知道的。</p>
         <div class="review-main-result">
           <strong>✓ 主活动结果</strong>
           <span>${escapeHtml(formatActivityReview(primarySummary))}</span>
@@ -927,6 +1093,7 @@ function renderReview() {
           <h2 id="privateReviewTitle">只留给你的内容</h2>
           <span>不会发送</span>
         </div>
+        <p class="review-section-intro">剩下的，就留在这里。</p>
         ${
           privateQuestionIds.length
             ? privateQuestionIds
@@ -945,7 +1112,12 @@ function renderReview() {
     ${
       state.submitted
         ? `<p class="submitted-note">这份本地确认状态会保留，刷新页面不会重复发送。</p>
-          <button class="restart-button" id="restartInvitation" type="button">重新填写一次</button>`
+          <p class="ending-copy">${escapeHtml(getEndingCopy(state.primaryActivity))}</p>
+          <button class="restart-button" id="restartInvitation" type="button">重新填写一次</button>
+          <div class="success-epilogue" aria-live="off">
+            <p class="success-epilogue-first">谢谢你认真走到这里。</p>
+            <p class="success-epilogue-second">这大概就是我做这个网页最想看到的画面。</p>
+          </div>`
         : `<div class="review-actions">
             <button class="paper-button primary wide" id="confirmSubmit" type="button">确认发送</button>
             <button class="paper-button secondary wide" id="backToAnswers" type="button">返回修改答案</button>
@@ -960,9 +1132,12 @@ function renderReview() {
       renderReview();
     });
   });
-  card.querySelector('#confirmSubmit')?.addEventListener('click', submitFinalAnswers);
+  const confirmButton = card.querySelector('#confirmSubmit');
+  confirmButton?.addEventListener('click', showSubmitFeedback);
+  confirmButton?.addEventListener('click', submitFinalAnswers);
   card.querySelector('#backToAnswers')?.addEventListener('click', returnToAnswers);
   card.querySelector('#restartInvitation')?.addEventListener('click', restartInvitation);
+  if (state.submitted) showSuccessEpilogue();
 }
 
 function restartInvitation() {
@@ -1075,5 +1250,6 @@ function showOutcome(type) {
   }, 260);
 }
 
+bindEasterEgg();
 saveState();
 render();

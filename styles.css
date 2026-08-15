@@ -75,6 +75,21 @@ button:focus-visible {
   mask-image: linear-gradient(to bottom, black, transparent 88%);
 }
 
+.date-app::after {
+  position: fixed;
+  z-index: -1;
+  width: min(54vw, 680px);
+  height: min(54vw, 680px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 216, 151, 0.18), transparent 68%);
+  content: "";
+  filter: blur(28px);
+  opacity: 0.16;
+  pointer-events: none;
+  transform: translate3d(-24vw, -18vh, 0);
+  animation: ambient-light-drift 18s var(--ease-standard) infinite alternate;
+}
+
 .stage {
   position: relative;
   display: grid;
@@ -119,7 +134,7 @@ button:focus-visible {
   animation: botanical-breathe 9s ease-in-out infinite alternate;
 }
 
-.botanical-left { top: 7%; left: -19px; transform: rotate(-13deg); }
+.botanical-left { top: 7%; left: -19px; pointer-events: auto; transform: rotate(-13deg); }
 .botanical-right {
   right: -16px;
   bottom: 6%;
@@ -534,6 +549,39 @@ button:focus-visible {
   line-height: 1.65;
 }
 
+.page-aside {
+  margin: 10px 0 0;
+  color: var(--ink-faint);
+  font-size: 0.73rem;
+  font-weight: 540;
+  letter-spacing: 0.015em;
+  line-height: 1.5;
+}
+
+.micro-reaction {
+  position: absolute;
+  z-index: 4;
+  right: clamp(28px, 8vw, 72px);
+  bottom: clamp(27px, 5vw, 48px);
+  max-width: min(68%, 260px);
+  margin: 0;
+  color: var(--sage-deep);
+  font-size: 0.76rem;
+  font-weight: 680;
+  letter-spacing: 0.025em;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  text-align: right;
+  transform: translate3d(0, 5px, 0);
+  transition: opacity 280ms var(--ease-standard), transform 380ms var(--ease-out);
+}
+
+.micro-reaction.is-visible {
+  opacity: 0.82;
+  transform: translate3d(0, 0, 0);
+}
+
 .review-sections {
   display: grid;
   width: 100%;
@@ -576,6 +624,14 @@ button:focus-visible {
 
 .review-private-section .review-section-heading > span {
   color: var(--ink-faint);
+}
+
+.review-section-intro {
+  margin: -4px 0 10px;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  font-weight: 520;
+  line-height: 1.5;
 }
 
 .review-main-result {
@@ -670,6 +726,16 @@ button:focus-visible {
   text-align: center;
 }
 
+.ending-copy {
+  max-width: 390px;
+  margin: 13px auto 0;
+  color: var(--sage-deep);
+  font-size: 0.78rem;
+  font-weight: 680;
+  line-height: 1.65;
+  text-align: center;
+}
+
 .restart-button {
   display: inline-flex;
   min-height: 40px;
@@ -689,6 +755,59 @@ button:focus-visible {
   transition: color 140ms var(--ease-standard), border-color 140ms var(--ease-standard);
   -webkit-tap-highlight-color: transparent;
 }
+
+.success-epilogue {
+  width: min(100%, 430px);
+  min-height: 82px;
+  align-self: center;
+  margin: 30px auto 0;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+.success-epilogue p {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 520;
+  line-height: 1.65;
+  opacity: 0;
+  transform: translate3d(0, 5px, 0);
+  transition: opacity 900ms var(--ease-standard), transform 1100ms var(--ease-out);
+}
+
+.success-epilogue p + p {
+  margin-top: 17px;
+  color: rgba(38, 52, 45, 0.48);
+}
+
+.success-epilogue p.is-visible {
+  opacity: 0.78;
+  transform: translate3d(0, 0, 0);
+}
+
+.easter-egg-copy {
+  position: absolute;
+  z-index: 5;
+  right: clamp(26px, 7vw, 64px);
+  bottom: clamp(24px, 4vw, 42px);
+  max-width: min(72%, 300px);
+  color: var(--ink-faint);
+  pointer-events: none;
+  text-align: right;
+}
+
+.easter-egg-copy p {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 540;
+  line-height: 1.55;
+  opacity: 0;
+  transform: translate3d(0, 4px, 0);
+  transition: opacity 650ms var(--ease-standard), transform 800ms var(--ease-out);
+}
+
+.easter-egg-copy p + p { margin-top: 5px; }
+.easter-egg-copy p.is-visible { opacity: 0.76; transform: translate3d(0, 0, 0); }
 
 .review-actions {
   display: flex;
@@ -777,6 +896,15 @@ button:focus-visible {
 
 .single-action { width: min(100%, 420px); margin: 0 auto; }
 
+.stage-note {
+  margin: 0 auto 15px;
+  color: var(--ink-faint);
+  font-size: 0.72rem;
+  font-weight: 560;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
 .invitation-choice-card {
   align-items: center;
   justify-content: center;
@@ -852,6 +980,11 @@ button:focus-visible {
 
 .paper-button:not(:disabled):active, .option-card:not(:disabled):active { transform: translateY(1px) scale(0.985); }
 
+.paper-button.is-soft-confirming {
+  box-shadow: 0 4px 10px rgba(71, 91, 74, 0.14), inset 0 1px rgba(255, 255, 255, 0.28);
+  transform: translateY(1px) scale(0.992);
+}
+
 @keyframes card-shell-in {
   from { opacity: 0; transform: translateY(7px) scale(0.997); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -894,8 +1027,14 @@ button:focus-visible {
 
 @keyframes botanical-breathe { from { opacity: 0.4; } to { opacity: 0.5; } }
 
+@keyframes ambient-light-drift {
+  from { transform: translate3d(-24vw, -18vh, 0) scale(0.96); }
+  to { transform: translate3d(28vw, 22vh, 0) scale(1.04); }
+}
+
 @media (max-width: 640px) {
   .date-app { padding: 8px; }
+  .date-app::after { opacity: 0.08; animation: none; transform: translate3d(-18vw, -12vh, 0); }
   .stage { width: 100%; min-height: calc(100dvh - 16px); padding: 10px; }
   .paper-layer-one { inset: 2.4% 0 0 3.2%; }
   .paper-layer-two { inset: 1.2% 3.5% 2.2% 0; }
@@ -923,6 +1062,8 @@ button:focus-visible {
   .question-card, .detail-question-card { padding-top: 54px; padding-bottom: 38px; }
   .question-title { font-size: clamp(1.62rem, 7.7vw, 2.12rem); }
   .question-detail { margin-top: 10px; font-size: 0.87rem; line-height: 1.6; }
+  .page-aside { margin-top: 8px; font-size: 0.69rem; }
+  .micro-reaction { right: 25px; bottom: 24px; font-size: 0.7rem; }
   .option-grid { margin-top: 24px; gap: 10px; }
   .option-card { min-height: 106px; padding: 14px; border-radius: 14px; }
   .option-card-wide { min-height: 86px; }
@@ -975,6 +1116,10 @@ button:focus-visible {
     border-radius: 14px;
   }
 
+  .review-section-intro { font-size: 0.67rem; }
+  .success-epilogue { margin-top: 25px; }
+  .easter-egg-copy { right: 24px; bottom: 22px; }
+
   .review-answer-row {
     align-items: flex-start;
   }
@@ -1012,10 +1157,13 @@ button:focus-visible {
     transition-duration: 0.01ms !important;
   }
 
-  .paper-layer, .botanical { animation: none !important; }
+  .date-app::after, .paper-layer, .botanical { animation: none !important; }
   .invitation-card.is-entering,
   .invitation-card.is-leaving,
   .invitation-card.is-entering > *,
   .question-card.is-entering .option-card,
-  .transition-card.is-entering * { transform: none !important; }
+  .transition-card.is-entering *,
+  .micro-reaction,
+  .success-epilogue p,
+  .easter-egg-copy p { transform: none !important; }
 }
