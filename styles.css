@@ -142,6 +142,29 @@ button:focus-visible {
   animation-delay: -4.5s;
 }
 
+.botanical-hit-area {
+  position: absolute;
+  z-index: 3;
+  top: 7%;
+  left: -4px;
+  width: 52px;
+  height: 108px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.botanical-hit-area:focus-visible {
+  outline-color: rgba(114, 138, 118, 0.24);
+  outline-offset: 1px;
+}
+
 .botanical span {
   position: absolute;
   display: block;
@@ -736,6 +759,41 @@ button:focus-visible {
   text-align: center;
 }
 
+.result-card-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  margin: 18px auto 0;
+  padding: 10px 18px;
+  border: 1px solid rgba(114, 138, 118, 0.5);
+  border-radius: 12px;
+  color: var(--sage-deep);
+  background: rgba(230, 236, 227, 0.48);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 720;
+  line-height: 1.35;
+  transition: border-color 150ms var(--ease-standard), background-color 150ms var(--ease-standard), color 150ms var(--ease-standard), transform 150ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.result-card-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.result-card-status {
+  min-height: 17px;
+  margin: 6px auto 0;
+  color: var(--ink-faint);
+  font-size: 0.68rem;
+  font-weight: 540;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .restart-button {
   display: inline-flex;
   min-height: 40px;
@@ -976,9 +1034,16 @@ button:focus-visible {
     border-color: rgba(38, 52, 45, 0.38);
     color: var(--ink-soft);
   }
+
+  .result-card-button:not(:disabled):hover {
+    border-color: var(--sage-deep);
+    background: var(--sage-soft);
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
 }
 
-.paper-button:not(:disabled):active, .option-card:not(:disabled):active { transform: translateY(1px) scale(0.985); }
+.paper-button:not(:disabled):active, .option-card:not(:disabled):active, .result-card-button:not(:disabled):active { transform: translateY(1px) scale(0.985); }
 
 .paper-button.is-soft-confirming {
   box-shadow: 0 4px 10px rgba(71, 91, 74, 0.14), inset 0 1px rgba(255, 255, 255, 0.28);
@@ -1043,6 +1108,7 @@ button:focus-visible {
   .botanical { width: 70px; opacity: 0.34; transform: scale(0.78) rotate(-13deg); }
   .botanical-left { left: -27px; }
   .botanical-right { right: -27px; transform: scaleX(-1) scale(0.78) rotate(-11deg); }
+  .botanical-hit-area { left: -4px; width: 48px; height: 104px; }
 
   .invitation-card {
     width: 100%;

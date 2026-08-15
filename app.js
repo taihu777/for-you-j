@@ -386,6 +386,47 @@ function getEndingCopy(activity) {
   return endingCopies[activity] || '那就先把这次认真地收好。';
 }
 
+function getResultCardData(sourceState = state) {
+  const primary = getActivitySummary(sourceState.primaryActivity, sourceState);
+  const secondary = getActivitySummary(sourceState.secondaryActivity, sourceState);
+
+  return {
+    primaryActivity: primary?.activity_label || '',
+    primaryPreference: primary?.preference_label || '',
+    secondaryActivity: secondary?.activity_label || '到时候再说',
+    secondaryPreference: secondary?.preference_label || '不急着安排下一站',
+    invitationResponse: getInvitationResponseLabel(sourceState.invitationResponse),
+    ending: getEndingCopy(sourceState.primaryActivity),
+  };
+}
+
+async function saveResultCard(event) {
+  const button = event.currentTarget;
+  const status = card.querySelector('#resultCardStatus');
+  if (!state.submitted || button.disabled) return;
+
+  button.disabled = true;
+  button.textContent = '正在整理…';
+  status.textContent = '';
+
+  try {
+    const result = await window.DateInvitationResultCard?.save(getResultCardData());
+    if (!result) throw new Error('结果卡片功能不可用。');
+
+    status.textContent =
+      result.method === 'share'
+        ? '已经交给分享面板了。'
+        : result.method === 'download'
+          ? '图片已经保存。'
+          : '';
+  } catch {
+    status.textContent = '暂时没能保存，可以再试一次。';
+  } finally {
+    button.disabled = false;
+    button.textContent = '保存这次选择';
+  }
+}
+
 function clearSuccessEpilogueTimers() {
   clearTimers(successEpilogueTimers);
 }
@@ -416,7 +457,7 @@ function triggerEasterEgg() {
   if (easterEggTapCount < 5) {
     easterEggResetTimer = window.setTimeout(() => {
       easterEggTapCount = 0;
-    }, 2400);
+    }, 4000);
     return;
   }
 
@@ -441,7 +482,7 @@ function triggerEasterEgg() {
 }
 
 function bindEasterEgg() {
-  document.querySelector('.botanical-left')?.addEventListener('click', triggerEasterEgg);
+  document.querySelector('.botanical-hit-area')?.addEventListener('pointerup', triggerEasterEgg);
 }
 
 function showSubmitFeedback(event) {
@@ -1113,6 +1154,8 @@ function renderReview() {
       state.submitted
         ? `<p class="submitted-note">这份本地确认状态会保留，刷新页面不会重复发送。</p>
           <p class="ending-copy">${escapeHtml(getEndingCopy(state.primaryActivity))}</p>
+          <button class="result-card-button" id="saveResultCard" type="button">保存这次选择</button>
+          <p class="result-card-status" id="resultCardStatus" role="status" aria-live="polite"></p>
           <button class="restart-button" id="restartInvitation" type="button">重新填写一次</button>
           <div class="success-epilogue" aria-live="off">
             <p class="success-epilogue-first">谢谢你认真走到这里。</p>
@@ -1136,6 +1179,7 @@ function renderReview() {
   confirmButton?.addEventListener('click', showSubmitFeedback);
   confirmButton?.addEventListener('click', submitFinalAnswers);
   card.querySelector('#backToAnswers')?.addEventListener('click', returnToAnswers);
+  card.querySelector('#saveResultCard')?.addEventListener('click', saveResultCard);
   card.querySelector('#restartInvitation')?.addEventListener('click', restartInvitation);
   if (state.submitted) showSuccessEpilogue();
 }
