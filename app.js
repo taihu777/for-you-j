@@ -1505,7 +1505,7 @@ function triggerEasterEgg() {
       if (planeButton) planeButton.hidden = true;
       revealEasterEggCopy();
     },
-    reduceMotion.matches ? 150 : 460,
+    reduceMotion.matches ? 150 : 520,
   );
 }
 
@@ -1515,7 +1515,7 @@ function revealEasterEggCopy() {
   easterEggCopyTimers.forEach((timer) => window.clearTimeout(timer));
   easterEggCopyTimers = [];
   const message = document.createElement('div');
-  message.className = 'easter-egg-copy';
+  message.className = 'paper-plane-secret easter-egg-copy';
   message.setAttribute('aria-live', 'polite');
   message.innerHTML = `
     <div class="easter-egg-opening">

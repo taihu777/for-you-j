@@ -148,8 +148,8 @@ button:focus-visible {
 .paper-plane-easter-egg {
   position: absolute;
   z-index: 3;
-  right: clamp(68px, 10.5%, 82px);
-  bottom: clamp(56px, 8%, 72px);
+  top: clamp(46px, calc((100dvh - 760px) / 2), 67px);
+  right: calc(max(clamp(16px, 3vw, 30px), calc((100% - 650px) / 2)) + 22px);
   display: grid;
   width: 52px;
   height: 52px;
@@ -186,7 +186,7 @@ button:focus-visible {
   height: 36px;
   transform-origin: 52% 48%;
   will-change: transform, opacity;
-  animation: paper-plane-idle-drift 7s ease-in-out infinite;
+  animation: paper-plane-idle-drift 6.4s var(--ease-out) infinite;
 }
 
 .paper-plane-inner svg {
@@ -244,7 +244,7 @@ button:focus-visible {
 }
 
 .paper-plane-inner.is-flight-5 {
-  animation: paper-plane-depart 440ms var(--ease-out) both;
+  animation: paper-plane-depart 500ms var(--ease-out) both;
 }
 
 .botanical span {
@@ -1809,15 +1809,15 @@ button:focus-visible {
   animation: qixi-reduced-halo 7200ms ease-in-out var(--halo-delay) both;
 }
 
-.easter-egg-copy {
-  position: absolute;
-  z-index: 5;
-  right: clamp(26px, 7vw, 64px);
-  bottom: clamp(24px, 4vw, 42px);
-  max-width: min(72%, 300px);
+.paper-plane-secret {
+  position: relative;
+  width: min(100%, 650px);
+  min-width: 0;
+  margin: clamp(28px, 5vw, 48px) auto clamp(20px, 4vw, 38px);
+  padding: 0 clamp(26px, 7.5vw, 62px) clamp(26px, 5vw, 46px);
   color: var(--ink-faint);
-  pointer-events: none;
-  text-align: right;
+  pointer-events: auto;
+  text-align: left;
 }
 
 .easter-egg-copy p {
@@ -1834,13 +1834,13 @@ button:focus-visible {
 .easter-egg-copy p.is-visible { opacity: 0.76; transform: translate3d(0, 0, 0); }
 
 .easter-egg-copy.is-locking {
-  width: min(82vw, 360px);
-  max-width: min(82vw, 360px);
   pointer-events: auto;
 }
 
+.easter-egg-opening { margin-bottom: clamp(22px, 4vw, 32px); }
+
 .paper-plane-lock {
-  margin-top: 16px;
+  margin-top: 0;
   transition: opacity 420ms var(--ease-standard), transform 460ms var(--ease-out);
   opacity: 1;
   transform: translate3d(0, 0, 0);
@@ -1866,7 +1866,7 @@ button:focus-visible {
 
 .paper-plane-lock-form {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 10px;
   opacity: 0;
   transition: opacity 420ms var(--ease-standard), transform 460ms var(--ease-out);
@@ -1946,15 +1946,7 @@ button:focus-visible {
 .easter-egg-notes { display: none; }
 
 .easter-egg-copy.is-expanded {
-  position: relative;
-  right: auto;
-  bottom: auto;
-  width: min(100%, 620px);
-  max-width: none;
-  margin: clamp(34px, 6vw, 58px) auto clamp(24px, 5vw, 48px);
-  padding: 0 clamp(10px, 3vw, 24px) clamp(26px, 5vw, 46px);
   color: var(--ink-soft);
-  pointer-events: none;
   text-align: left;
 }
 
@@ -1962,7 +1954,6 @@ button:focus-visible {
 
 .easter-egg-copy.is-expanded .easter-egg-opening {
   margin-bottom: clamp(34px, 6vw, 52px);
-  text-align: right;
 }
 
 .easter-egg-copy.is-expanded .easter-egg-opening p {
@@ -2257,14 +2248,15 @@ button:focus-visible {
 }
 
 @keyframes paper-plane-idle-drift {
-  0%, 82%, 100% { transform: translate3d(0, 0, 0) rotate(0); }
-  89% { transform: translate3d(0, -2px, 0) rotate(2deg); }
-  96% { transform: translate3d(0, 0, 0) rotate(0); }
+  0%, 86%, 100% { transform: translate3d(0, 0, 0) rotate(0); }
+  89% { transform: translate3d(-5px, 4px, 0) rotate(-3deg); }
+  94% { transform: translate3d(7px, -7px, 0) rotate(5deg); }
+  98% { transform: translate3d(0, 0, 0) rotate(0); }
 }
 
 @keyframes paper-plane-depart {
   from { opacity: 1; transform: translate3d(0, 0, 0) rotate(0); }
-  to { opacity: 0; transform: translate3d(20px, -14px, 0) rotate(7deg); }
+  to { opacity: 0; transform: translate3d(28px, -23px, 0) rotate(11deg); }
 }
 
 @keyframes ambient-light-drift {
@@ -2422,8 +2414,8 @@ button:focus-visible {
   .botanical-left { left: -27px; }
   .botanical-right { right: -27px; transform: scaleX(-1) scale(0.78) rotate(-11deg); }
   .paper-plane-easter-egg {
-    right: 18px;
-    bottom: 24px;
+    top: 28px;
+    right: 30px;
     width: 52px;
     height: 52px;
   }
@@ -2517,21 +2509,15 @@ button:focus-visible {
 
   .review-section-intro { font-size: 0.67rem; }
   .success-epilogue { margin-top: 25px; }
-  .easter-egg-copy { right: 24px; bottom: 22px; }
-  .easter-egg-copy.is-locking {
-    right: 20px;
-    bottom: 24px;
-    width: min(84vw, 350px);
-    max-width: min(84vw, 350px);
+  .paper-plane-secret {
+    width: 100%;
+    margin: 26px auto 20px;
+    padding: 0 clamp(20px, 6vw, 30px) 42px;
   }
   .paper-plane-lock-form { flex-wrap: nowrap; }
   .paper-plane-lock-input { min-width: 0; flex: 1; }
   .easter-egg-copy.is-expanded {
-    right: auto;
-    bottom: auto;
-    width: 100%;
-    margin: 30px auto 22px;
-    padding: 0 7px 44px;
+    margin-top: 30px;
   }
   .easter-egg-copy.is-expanded .easter-egg-opening { margin-bottom: 34px; }
   .easter-egg-notes-body { margin-top: 20px; gap: 22px; }
@@ -2578,7 +2564,9 @@ button:focus-visible {
 
 @media (max-width: 360px) {
   .stage { padding: 8px; }
+  .paper-plane-easter-egg { top: 26px; right: 26px; }
   .invitation-card { min-height: calc(100dvh - 32px); padding-right: 18px; padding-left: 18px; }
+  .paper-plane-secret { padding-right: 18px; padding-left: 18px; }
   .opening-actions .paper-button { width: calc(100% - 34px); }
   .option-grid { gap: 8px; }
   .option-card { min-height: 101px; padding: 12px; }
