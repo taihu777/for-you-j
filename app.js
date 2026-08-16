@@ -38,6 +38,10 @@ qixiMusic.loop = false;
 let qixiMusicHasStarted = false;
 let qixiMusicLoadFailed = false;
 let qixiMusicTogglePending = false;
+let qixiMusicPlaybackActive = false;
+let qixiMusicBuffering = false;
+let qixiMusicBufferHintVisible = false;
+let qixiMusicBufferHintTimer = null;
 let musicPickerOpen = false;
 
 const mainActivityQuestion = {
@@ -476,6 +480,15 @@ function formatText(value) {
 }
 
 function isQixiMusicPlaying() {
+  return (
+    qixiMusicPlaybackActive &&
+    !qixiMusicLoadFailed &&
+    !qixiMusic.paused &&
+    !qixiMusic.ended
+  );
+}
+
+function isQixiMusicPlaybackEngaged() {
   return !qixiMusicLoadFailed && !qixiMusic.paused && !qixiMusic.ended;
 }
 
@@ -486,6 +499,8 @@ function getCurrentQixiTrack() {
 function getQixiMusicHint() {
   const track = getCurrentQixiTrack();
   if (qixiMusicLoadFailed) return '这首歌暂时没加载出来';
+  if (qixiMusicBufferHintVisible) return '缓冲一下…';
+  if (qixiMusicBuffering) return `${track.title} · ${track.artist}`;
   if (qixiMusic.ended) return '听完啦 · 点一下可以再听';
   if (isQixiMusicPlaying()) return `${track.title} · ${track.artist}`;
   if (qixiMusicHasStarted) return '已暂停 · 点一下继续';
@@ -533,13 +548,14 @@ function renderMusicTrackPicker() {
 
 function syncMusicRecords() {
   const isPlaying = isQixiMusicPlaying();
+  const isPlaybackEngaged = isQixiMusicPlaybackEngaged();
   const currentTrack = getCurrentQixiTrack();
   document.querySelectorAll('.music-record').forEach((record) => {
     record.classList.toggle('is-playing', isPlaying);
-    record.setAttribute('aria-pressed', String(isPlaying));
+    record.setAttribute('aria-pressed', String(isPlaybackEngaged));
     record.setAttribute(
       'aria-label',
-      `${isPlaying ? '暂停' : '播放'}《${currentTrack.title}》`,
+      `${isPlaybackEngaged ? '暂停' : '播放'}《${currentTrack.title}》`,
     );
     record.setAttribute('title', `播放 / 暂停《${currentTrack.title}》`);
   });
@@ -587,7 +603,7 @@ function syncMusicRecords() {
 async function toggleQixiMusic() {
   if (qixiMusicTogglePending) return;
 
-  if (isQixiMusicPlaying()) {
+  if (isQixiMusicPlaybackEngaged()) {
     qixiMusic.pause();
     return;
   }
@@ -596,7 +612,10 @@ async function toggleQixiMusic() {
   qixiMusicTogglePending = true;
 
   try {
+    qixiMusic.preload = 'auto';
+    qixiMusicLoadFailed = false;
     if (!qixiMusic.getAttribute('src') || qixiMusic.error) {
+      clearQixiMusicBufferingState();
       qixiMusic.src = getCurrentQixiTrack().src;
     }
     const playPromise = qixiMusic.play();
@@ -638,6 +657,8 @@ async function selectQixiTrack(nextTrackIndex) {
   changeButton?.focus({ preventScroll: true });
 
   try {
+    qixiMusic.preload = 'auto';
+    clearQixiMusicBufferingState();
     qixiMusic.src = getCurrentQixiTrack().src;
     qixiMusic.currentTime = 0;
     await qixiMusic.play();
@@ -687,15 +708,69 @@ function bindMusicRecords() {
   syncMusicRecords();
 }
 
-qixiMusic.addEventListener('playing', () => {
+function clearQixiMusicBufferingState() {
+  window.clearTimeout(qixiMusicBufferHintTimer);
+  qixiMusicBufferHintTimer = null;
+  qixiMusicBuffering = false;
+  qixiMusicBufferHintVisible = false;
+}
+
+function handleQixiMusicPlaying() {
+  clearQixiMusicBufferingState();
+  qixiMusicPlaybackActive = true;
   qixiMusicHasStarted = true;
   qixiMusicLoadFailed = false;
   syncMusicRecords();
+}
+
+function handleQixiMusicBuffering() {
+  if (qixiMusic.paused || qixiMusic.ended || qixiMusicLoadFailed) return;
+
+  qixiMusicPlaybackActive = false;
+  if (!qixiMusicBuffering) {
+    qixiMusicBuffering = true;
+    window.clearTimeout(qixiMusicBufferHintTimer);
+    qixiMusicBufferHintTimer = window.setTimeout(() => {
+      if (!qixiMusicBuffering || qixiMusic.paused || qixiMusic.ended) return;
+      qixiMusicBufferHintVisible = true;
+      syncMusicRecords();
+    }, 400);
+  }
+  syncMusicRecords();
+}
+
+function handleQixiMusicStopped() {
+  qixiMusicPlaybackActive = false;
+  clearQixiMusicBufferingState();
+  syncMusicRecords();
+}
+
+function handleQixiMusicLoadStart() {
+  qixiMusicPlaybackActive = false;
+  syncMusicRecords();
+}
+
+function handleQixiPassiveMediaEvent() {
+  // Readiness/progress/suspend events do not prove that audio is audibly playing.
+}
+
+qixiMusic.addEventListener('loadstart', handleQixiMusicLoadStart);
+qixiMusic.addEventListener('loadedmetadata', handleQixiPassiveMediaEvent);
+qixiMusic.addEventListener('canplay', handleQixiPassiveMediaEvent);
+qixiMusic.addEventListener('play', () => {
+  qixiMusicLoadFailed = false;
 });
-qixiMusic.addEventListener('pause', syncMusicRecords);
-qixiMusic.addEventListener('ended', syncMusicRecords);
+qixiMusic.addEventListener('playing', handleQixiMusicPlaying);
+qixiMusic.addEventListener('waiting', handleQixiMusicBuffering);
+qixiMusic.addEventListener('stalled', handleQixiMusicBuffering);
+qixiMusic.addEventListener('suspend', handleQixiPassiveMediaEvent);
+qixiMusic.addEventListener('progress', handleQixiPassiveMediaEvent);
+qixiMusic.addEventListener('pause', handleQixiMusicStopped);
+qixiMusic.addEventListener('ended', handleQixiMusicStopped);
 qixiMusic.addEventListener('error', () => {
   qixiMusicLoadFailed = true;
+  qixiMusicPlaybackActive = false;
+  clearQixiMusicBufferingState();
   qixiMusic.pause();
   syncMusicRecords();
 });
