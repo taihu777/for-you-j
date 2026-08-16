@@ -12,19 +12,19 @@ const qixiTracks = [
     id: 'hong-zhi-jian',
     title: '虹之间',
     artist: 'en (王翊恩)',
-    src: 'assets/music/2-hong-zhi-jian.mp3',
+    src: 'https://taihu777.oss-cn-hangzhou.aliyuncs.com/2-hong-zhi-jian.mp3',
   },
   {
     id: 'wu-ming-de-ren',
     title: '无名的人',
     artist: 'en (王翊恩)',
-    src: 'assets/music/3-wu-ming-de-ren.mp3',
+    src: 'https://taihu777.oss-cn-hangzhou.aliyuncs.com/3-wu-ming-de-ren.mp3',
   },
   {
     id: 'tian-hou',
     title: '天后',
     artist: 'en (王翊恩)',
-    src: 'assets/music/4-tian-hou.mp3',
+    src: 'https://taihu777.oss-cn-hangzhou.aliyuncs.com/4-tian-hou.mp3',
   },
 ];
 let currentTrackIndex = 0;
