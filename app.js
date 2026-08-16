@@ -361,12 +361,103 @@ const qixiLightPoints = [
   { x: 66, y: 23, size: 5, opacity: 0.29, blur: 2, duration: 14, delay: -8, dx: 10, dy: -13, tone: 'sage' },
   { x: 38, y: 93, size: 12, opacity: 0.18, blur: 4, duration: 24, delay: -16, dx: 15, dy: -8, tone: 'straw' },
 ];
+const qixiFireworkBursts = [
+  { x: 17, y: 20, delay: 650, distance: 66, count: 20, wave: 1 },
+  { x: 84, y: 18, delay: 880, distance: 70, count: 20, wave: 1 },
+  { x: 10, y: 43, delay: 1120, distance: 60, count: 16, wave: 1 },
+  { x: 90, y: 42, delay: 1360, distance: 62, count: 18, wave: 1, mobileOptional: true },
+  { x: 30, y: 12, delay: 2100, distance: 88, count: 26, wave: 2 },
+  { x: 70, y: 10, delay: 2420, distance: 82, count: 24, wave: 2 },
+  { x: 8, y: 67, delay: 2760, distance: 68, count: 20, wave: 2 },
+  { x: 92, y: 65, delay: 3120, distance: 70, count: 20, wave: 2, mobileOptional: true },
+  { x: 24, y: 80, delay: 3480, distance: 54, count: 14, wave: 2, mobileOptional: true },
+  { x: 34, y: 29, delay: 5200, distance: 92, count: 28, wave: 3 },
+  { x: 68, y: 31, delay: 5700, distance: 88, count: 26, wave: 3 },
+];
+const qixiEffectTones = ['champagne', 'ivory', 'gold', 'clay', 'blush', 'sage'];
+const qixiFloatingLightPoints = Array.from({ length: 24 }, (_, index) => ({
+  x: 4 + ((index * 37) % 92),
+  y: 6 + ((index * 29) % 86),
+  size: 3 + (index % 5),
+  delay: 900 + (index % 8) * 260,
+  duration: 7600 + (index % 6) * 700,
+  driftX: -16 + (index % 7) * 5,
+  driftY: -30 - (index % 5) * 8,
+  tone: qixiEffectTones[index % qixiEffectTones.length],
+}));
+const qixiEmbers = Array.from({ length: 16 }, (_, index) => ({
+  x: 8 + ((index * 31) % 84),
+  y: 16 + ((index * 19) % 48),
+  delay: 1900 + (index % 8) * 520,
+  duration: 3800 + (index % 5) * 430,
+  drift: -14 + (index % 6) * 6,
+  fall: 96 + (index % 5) * 20,
+  tone: qixiEffectTones[(index + 2) % qixiEffectTones.length],
+}));
+const qixiFinalLights = [
+  { x: 42, y: 43 }, { x: 49, y: 39 }, { x: 57, y: 43 }, { x: 61, y: 49 },
+  { x: 58, y: 57 }, { x: 52, y: 62 }, { x: 44, y: 59 }, { x: 39, y: 53 },
+  { x: 47, y: 48 }, { x: 55, y: 52 },
+];
+const qixiBlessings = [
+  '愿你一直有自己的方向。',
+  '愿你遇见的都是好天气。',
+  '愿很多事情都刚刚好。',
+  '愿你的努力都有回应。',
+  '愿你一直自由，也一直勇敢。',
+  '愿你想去的地方都能抵达。',
+  '愿你忙的时候有所收获，闲的时候有所快乐。',
+  '愿生活偶尔也给你一点惊喜。',
+  '愿你的下一站比这一站更好。',
+  '愿你有很多值得期待的明天。',
+  '愿那些烦人的事情早点过去。',
+  '愿你喜欢的人和事都不辜负你。',
+  '愿你一直有重新出发的勇气。',
+  '愿你偶尔也可以什么都不想。',
+  '愿每一次认真都有意义。',
+  '愿你做自己喜欢的自己。',
+  '愿好运偶尔偏心你一点。',
+  '愿今天以后，也有很多开心的日子。',
+  '愿有人一直记得你随口提过的小事。',
+  '这一条不算祝福，只是想说，七夕快乐。',
+];
+const easterEggNotes = [
+  '我嘴笨，有时候说的话不经过脑子，希望不会影响到你的心情。',
+  '我其实有点敏感，有时候你不经意一句话我会想很久，会自我消耗，所以有时候会突然发癫，抱歉啊。',
+  '我不会安慰人，你跟我分享的事，我很喜欢，但是我会经常性因为自己帮不上忙而感到无力，苍白的话语更让我感到无奈，虽然你说过只是让我听着。',
+  '我偶尔会想你为什么来找我，我真的想过很久，分析了很多，结果现在好像不重要，但是我真的超级超级开心，因为从那以后生活里多了很多有意思的事，也多了很多期待。',
+  '该怎么形容那天期末周复习无力，无意翻看微信，看到一个陌生好友申请，在经过重重确认后，全身像遭遇电击那样的震撼感呢——真是前所未有的感觉。',
+  '我买了你推荐的零食，真的很好吃，你真会挑零食呀。',
+  '其实还有很多话，我之后慢慢加。原本觉得这些话你大概率也不会看到，不过你真看到这里的话，已经比我预计得远多了。',
+];
 let microReactionTimers = [];
 let successEpilogueTimers = [];
+let easterEggCopyTimers = [];
 let easterEggTapCount = 0;
 let easterEggResetTimer = null;
 let easterEggRevealed = false;
+let paperPlaneNotesUnlocked = false;
+let paperPlaneFeedbackTimer = null;
+let paperPlaneDepartureTimer = null;
 let qixiFinalTransitioning = false;
+let qixiFinalTapCount = 0;
+let qixiFireworkTriggered = false;
+let qixiFinalHintTimer = null;
+let qixiDiscoveryHintTimer = null;
+let qixiFireworkStartTimer = null;
+let qixiFireworkActivationTimer = null;
+let qixiFireworkCleanupTimer = null;
+let qixiHeartStartTimer = null;
+let qixiHeartCompleteTimer = null;
+let qixiInteractiveFinaleReady = false;
+let qixiHeartFormationComplete = false;
+let qixiFinalePointerStart = null;
+let qixiLastInteractiveFireworkAt = 0;
+let qixiBlessingBag = [];
+let qixiLastBlessing = '';
+let qixiBlessingSwapTimer = null;
+let qixiBlessingFadeTimer = null;
+const qixiInteractiveFireworks = new Map();
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -737,9 +828,465 @@ function renderQixiLightPoints() {
     .join('');
 }
 
+function renderQixiFireworks() {
+  return qixiFireworkBursts
+    .map((burst, burstIndex) => {
+      const outerCount = Math.ceil(burst.count * 0.68);
+      const innerCount = burst.count - outerCount;
+      const sparks = Array.from({ length: burst.count }, (_, sparkIndex) => {
+        const isInner = sparkIndex >= outerCount;
+        const ringIndex = isInner ? sparkIndex - outerCount : sparkIndex;
+        const ringCount = isInner ? innerCount : outerCount;
+        const angle = (Math.PI * 2 * ringIndex) / ringCount + burstIndex * 0.13 + (isInner ? 0.17 : 0);
+        const distance = burst.distance * (isInner ? 0.58 : 0.9 + (sparkIndex % 3) * 0.05);
+        const sparkX = (Math.cos(angle) * distance).toFixed(1);
+        const sparkY = (Math.sin(angle) * distance).toFixed(1);
+        const sparkDelay = burst.delay + (isInner ? 170 : 0) + (sparkIndex % 2) * 34;
+        const tone = qixiEffectTones[(sparkIndex + burstIndex) % qixiEffectTones.length];
+        return `<span class="qixi-firework-spark qixi-effect-${tone}${
+          isInner ? ' is-inner-ring' : ''
+        }" style="--spark-x:${sparkX}px;--spark-y:${sparkY}px;--spark-angle:${angle.toFixed(
+          3,
+        )}rad;--spark-delay:${sparkDelay}ms"></span>`;
+      }).join('');
+
+      return `<span class="qixi-firework-burst qixi-firework-wave-${burst.wave}${
+        burst.mobileOptional ? ' is-mobile-optional' : ''
+      }" style="--burst-x:${burst.x}%;--burst-y:${burst.y}%;--burst-delay:${burst.delay}ms">${sparks}</span>`;
+    })
+    .join('');
+}
+
+function renderQixiFloatingLights() {
+  return qixiFloatingLightPoints
+    .map(
+      (point) => `<span class="qixi-float-light qixi-effect-${point.tone}" style="--float-x:${
+        point.x
+      }%;--float-y:${point.y}%;--float-size:${point.size}px;--float-delay:${
+        point.delay
+      }ms;--float-duration:${point.duration}ms;--float-drift-x:${point.driftX}px;--float-drift-y:${
+        point.driftY
+      }px"></span>`,
+    )
+    .join('');
+}
+
+function renderQixiEmbers() {
+  return qixiEmbers
+    .map(
+      (point) => `<span class="qixi-ember qixi-effect-${point.tone}" style="--ember-x:${
+        point.x
+      }%;--ember-y:${point.y}%;--ember-delay:${point.delay}ms;--ember-duration:${
+        point.duration
+      }ms;--ember-drift:${point.drift}px;--ember-fall:${point.fall}px"></span>`,
+    )
+    .join('');
+}
+
+function renderQixiFinalLights() {
+  return qixiFinalLights
+    .map(
+      (point, index) => `<span class="qixi-final-light qixi-effect-${
+        qixiEffectTones[index % qixiEffectTones.length]
+      }" style="--final-x:${point.x}%;--final-y:${point.y}%;--final-delay:${
+        6600 + index * 90
+      }ms"></span>`,
+    )
+    .join('');
+}
+
+function renderQixiReducedFinale() {
+  const stars = Array.from({ length: 24 }, (_, index) => {
+    const x = 5 + ((index * 37) % 90);
+    const y = 7 + ((index * 23) % 84);
+    const size = 3 + (index % 5);
+    const tone = qixiEffectTones[index % qixiEffectTones.length];
+    return `<span class="qixi-reduced-star qixi-effect-${tone}" style="--reduced-x:${x}%;--reduced-y:${y}%;--reduced-size:${size}px;--reduced-delay:${
+      (index % 6) * 180
+    }ms"></span>`;
+  }).join('');
+
+  const halos = [
+    [22, 27, 150],
+    [78, 31, 190],
+    [52, 68, 230],
+  ]
+    .map(
+      ([x, y, size], index) => `<span class="qixi-reduced-halo" style="--halo-x:${x}%;--halo-y:${
+        y
+      }%;--halo-size:${size}px;--halo-delay:${index * 320}ms"></span>`,
+    )
+    .join('');
+
+  return `${halos}${stars}`;
+}
+
+function renderQixiCalmLights() {
+  return Array.from({ length: 10 }, (_, index) => {
+    const x = 7 + ((index * 41) % 86);
+    const y = 9 + ((index * 27) % 82);
+    const tone = index % 2 === 0 ? 'champagne' : 'sage';
+    return `<span class="qixi-calm-light qixi-effect-${tone}" style="--calm-x:${x}%;--calm-y:${y}%;--calm-size:${
+      2 + (index % 3)
+    }px"></span>`;
+  }).join('');
+}
+
+function renderQixiHeartParticles() {
+  const mobileOptionalIndexes = new Set([4, 13, 22, 30]);
+  return Array.from({ length: 34 }, (_, index) => {
+    const angle = (Math.PI * 2 * index) / 34;
+    const heartX = 16 * Math.sin(angle) ** 3;
+    const heartY = 13 * Math.cos(angle) - 5 * Math.cos(angle * 2) - 2 * Math.cos(angle * 3) - Math.cos(angle * 4);
+    const jitterX = ((index * 7) % 5 - 2) * 0.38;
+    const jitterY = ((index * 11) % 5 - 2) * 0.32;
+    const targetX = 50 + (heartX / 16) * 45 + jitterX;
+    const targetY = 6 + ((12 - heartY) / 29) * 88 + jitterY;
+    const travelsFromFireworks = index === 0 || index % 3 !== 0;
+    const direction = index % 4;
+    const fromX = index === 0
+      ? 0
+      : travelsFromFireworks
+        ? (direction < 2 ? -1 : 1) * (150 + (index % 5) * 24)
+        : -32 + (index % 5) * 16;
+    const fromY = index === 0
+      ? -165
+      : travelsFromFireworks
+        ? [-145, -78, 112, 168][direction]
+        : -22 + (index % 4) * 15;
+    const delay = index === 0 ? 0 : 420 + Math.floor((index - 1) / 4) * 125;
+    const duration = index === 0 ? 2200 : 1800 + (index % 6) * 220;
+    const size = 4 + (index % 4);
+    const tone = qixiEffectTones[(index + 1) % qixiEffectTones.length];
+    return `<span class="qixi-heart-particle${index === 0 ? ' is-heart-lead' : ''}${
+      mobileOptionalIndexes.has(index) ? ' is-mobile-optional' : ''
+    } qixi-effect-${tone}" style="--heart-x:${targetX.toFixed(2)}%;--heart-y:${targetY.toFixed(
+      2,
+    )}%;--heart-from-x:${fromX}px;--heart-from-y:${fromY}px;--heart-delay:${
+      delay
+    }ms;--heart-duration:${duration}ms;--heart-size:${size}px;--heart-breathe:${
+      3200 + (index % 7) * 380
+    }ms;--heart-breathe-delay:${-index * 140}ms"><i></i></span>`;
+  }).join('');
+}
+
+function enableQixiInteractiveFinale() {
+  if (!qixiHeartFormationComplete || card.dataset.screen !== 'qixi-final') return;
+  qixiInteractiveFinaleReady = true;
+  dateApp?.classList.add('is-qixi-interactive-ready');
+  card.classList.add('is-interactive-ready');
+}
+
+function startQixiHeartFormation() {
+  const heartLayer = card.querySelector('.qixi-heart-particle-layer');
+  if (!heartLayer || qixiHeartFormationComplete) return;
+
+  heartLayer.innerHTML = renderQixiHeartParticles();
+  heartLayer.classList.remove('is-forming', 'is-complete');
+  void heartLayer.offsetWidth;
+
+  const activateHeart = () => {
+    if (!heartLayer.isConnected || heartLayer.classList.contains('is-forming')) return;
+    heartLayer.classList.add('is-forming');
+    void heartLayer.offsetWidth;
+    const startTime = document.timeline.currentTime;
+    heartLayer.getAnimations({ subtree: true }).forEach((animation) => {
+      animation.startTime = startTime;
+    });
+  };
+  requestAnimationFrame(() => requestAnimationFrame(activateHeart));
+  window.setTimeout(activateHeart, 32);
+
+  window.clearTimeout(qixiHeartCompleteTimer);
+  qixiHeartCompleteTimer = window.setTimeout(() => {
+    if (!heartLayer.isConnected) return;
+    qixiHeartFormationComplete = true;
+    heartLayer.classList.add('is-complete');
+    card.querySelector('.qixi-final-main')?.classList.add('is-heart-glowing');
+    window.setTimeout(
+      () => card.querySelector('.qixi-final-main')?.classList.remove('is-heart-glowing'),
+      reduceMotion.matches ? 700 : 760,
+    );
+    if (!dateApp?.classList.contains('is-qixi-grand-finale')) enableQixiInteractiveFinale();
+  }, reduceMotion.matches ? 3300 : 4500);
+}
+
+function removeQixiInteractiveFirework(element) {
+  const timer = qixiInteractiveFireworks.get(element);
+  if (timer) window.clearTimeout(timer);
+  qixiInteractiveFireworks.delete(element);
+  element.remove();
+}
+
+function clearQixiInteractiveFinale() {
+  qixiInteractiveFireworks.forEach((timer, element) => {
+    window.clearTimeout(timer);
+    element.remove();
+  });
+  qixiInteractiveFireworks.clear();
+  window.clearTimeout(qixiBlessingSwapTimer);
+  window.clearTimeout(qixiBlessingFadeTimer);
+  qixiInteractiveFinaleReady = false;
+  qixiHeartFormationComplete = false;
+  qixiFinalePointerStart = null;
+  qixiLastInteractiveFireworkAt = 0;
+  qixiBlessingBag = [];
+  qixiLastBlessing = '';
+  dateApp?.classList.remove('is-qixi-interactive-ready');
+}
+
+function refillQixiBlessingBag() {
+  qixiBlessingBag = [...qixiBlessings];
+  for (let index = qixiBlessingBag.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [qixiBlessingBag[index], qixiBlessingBag[swapIndex]] = [
+      qixiBlessingBag[swapIndex],
+      qixiBlessingBag[index],
+    ];
+  }
+
+  const nextIndex = qixiBlessingBag.length - 1;
+  if (qixiBlessingBag[nextIndex] === qixiLastBlessing && nextIndex > 0) {
+    [qixiBlessingBag[nextIndex], qixiBlessingBag[0]] = [
+      qixiBlessingBag[0],
+      qixiBlessingBag[nextIndex],
+    ];
+  }
+}
+
+function takeQixiBlessing() {
+  if (qixiBlessingBag.length === 0) refillQixiBlessingBag();
+  const blessing = qixiBlessingBag.pop();
+  qixiLastBlessing = blessing;
+  return blessing;
+}
+
+function showQixiBlessing() {
+  const line = card.querySelector('.qixi-blessing-line');
+  if (!line) return;
+
+  const blessing = takeQixiBlessing();
+  window.clearTimeout(qixiBlessingSwapTimer);
+  window.clearTimeout(qixiBlessingFadeTimer);
+  line.classList.remove('is-visible');
+  qixiBlessingSwapTimer = window.setTimeout(() => {
+    if (!line.isConnected) return;
+    line.textContent = blessing;
+    void line.offsetWidth;
+    line.classList.add('is-visible');
+    qixiBlessingFadeTimer = window.setTimeout(() => line.classList.remove('is-visible'), 4200);
+  }, line.textContent ? 170 : 220);
+}
+
+function createQixiInteractiveFirework(clientX, clientY) {
+  const layer = card.querySelector('.qixi-click-firework-layer');
+  if (!qixiInteractiveFinaleReady || !layer) return false;
+
+  if (qixiInteractiveFireworks.size >= 5) {
+    const oldest = qixiInteractiveFireworks.keys().next().value;
+    if (oldest) removeQixiInteractiveFirework(oldest);
+  }
+
+  const isMobile = window.innerWidth <= 640;
+  const sparkCount = reduceMotion.matches ? 8 : isMobile ? 12 : 16;
+  const radius = reduceMotion.matches ? 22 : isMobile ? 52 + Math.random() * 14 : 66 + Math.random() * 18;
+  const tonePairs = [
+    ['champagne', 'ivory'],
+    ['gold', 'champagne'],
+    ['clay', 'blush'],
+    ['sage', 'ivory'],
+  ];
+  const tones = tonePairs[Math.floor(Math.random() * tonePairs.length)];
+  const firework = document.createElement('span');
+  firework.className = `qixi-click-firework${reduceMotion.matches ? ' is-reduced' : ''}`;
+  firework.style.setProperty('--click-left', `${clientX}px`);
+  firework.style.setProperty('--click-top', `${clientY}px`);
+  firework.innerHTML = Array.from({ length: sparkCount }, (_, index) => {
+    const angle = (Math.PI * 2 * index) / sparkCount + Math.random() * 0.08;
+    const distance = radius * (0.78 + Math.random() * 0.22);
+    const duration = reduceMotion.matches ? 680 : 880 + Math.round(Math.random() * 300);
+    return `<i class="qixi-click-spark qixi-effect-${tones[index % tones.length]}" style="--click-x:${(
+      Math.cos(angle) * distance
+    ).toFixed(1)}px;--click-y:${(Math.sin(angle) * distance).toFixed(
+      1,
+    )}px;--click-angle:${angle.toFixed(3)}rad;--click-duration:${duration}ms"></i>`;
+  }).join('');
+  layer.append(firework);
+
+  const activateFirework = () => {
+    if (!firework.isConnected || firework.classList.contains('is-active')) return;
+    firework.classList.add('is-active');
+    void firework.offsetWidth;
+    const startTime = document.timeline.currentTime;
+    firework.getAnimations({ subtree: true }).forEach((animation) => {
+      animation.startTime = startTime;
+    });
+  };
+  requestAnimationFrame(() => requestAnimationFrame(activateFirework));
+  window.setTimeout(activateFirework, 32);
+
+  const cleanupTimer = window.setTimeout(
+    () => removeQixiInteractiveFirework(firework),
+    reduceMotion.matches ? 820 : 1380,
+  );
+  qixiInteractiveFireworks.set(firework, cleanupTimer);
+  showQixiBlessing();
+  return true;
+}
+
+function handleQixiFinalePointerDown(event) {
+  if (!qixiInteractiveFinaleReady || stage.dataset.screen !== 'qixi-final') return;
+  qixiFinalePointerStart = {
+    pointerId: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    target: event.target,
+  };
+}
+
+function handleQixiFinalePointerUp(event) {
+  const start = qixiFinalePointerStart;
+  qixiFinalePointerStart = null;
+  if (!qixiInteractiveFinaleReady || !start || start.pointerId !== event.pointerId) return;
+  if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 10) return;
+  const interactiveSelector = 'button, a, input, textarea, select, [role="button"], [contenteditable="true"]';
+  if (start.target instanceof Element && start.target.closest(interactiveSelector)) return;
+  if (event.target instanceof Element && event.target.closest(interactiveSelector)) return;
+
+  const now = performance.now();
+  if (now - qixiLastInteractiveFireworkAt < 180) return;
+  qixiLastInteractiveFireworkAt = now;
+  createQixiInteractiveFirework(event.clientX, event.clientY);
+}
+
+function bindQixiFinaleInteraction() {
+  dateApp?.addEventListener('pointerdown', handleQixiFinalePointerDown);
+  dateApp?.addEventListener('pointerup', handleQixiFinalePointerUp);
+  dateApp?.addEventListener('pointercancel', () => {
+    qixiFinalePointerStart = null;
+  });
+}
+
+function setQixiFinalHint(copy, visibleFor = 0) {
+  const hint = card.querySelector('.qixi-final-secret');
+  if (!hint) return;
+
+  window.clearTimeout(qixiFinalHintTimer);
+  hint.textContent = copy;
+  hint.classList.toggle('is-visible', Boolean(copy));
+
+  if (visibleFor > 0) {
+    qixiFinalHintTimer = window.setTimeout(() => {
+      hint.classList.remove('is-visible');
+    }, visibleFor);
+  }
+}
+
+function hideQixiDiscoveryHint() {
+  window.clearTimeout(qixiDiscoveryHintTimer);
+  const discoveryHint = card.querySelector('.qixi-discovery-hint');
+  if (!discoveryHint) return;
+  discoveryHint.classList.remove('is-visible');
+  discoveryHint.hidden = true;
+}
+
+function triggerQixiFirework() {
+  const sceneEffects = stage.querySelector('.qixi-scene-effects');
+  const fireworkField = card.querySelector('.qixi-firework-field');
+  const lightField = sceneEffects?.querySelector('.qixi-light-field');
+  if (!sceneEffects || !fireworkField || !lightField) return;
+
+  dateApp?.classList.remove('is-qixi-grand-calm');
+  dateApp?.classList.add('is-qixi-grand-finale');
+  sceneEffects.classList.remove('is-grand-calm');
+  sceneEffects.classList.add('is-firework-enhanced', 'is-grand-finale');
+  card.classList.remove('is-grand-calm');
+  card.classList.add('is-grand-finale');
+  card.querySelector('.qixi-final-main')?.classList.add('is-celebrating');
+  fireworkField.classList.remove('is-active');
+
+  if (reduceMotion.matches) {
+    fireworkField.innerHTML = renderQixiReducedFinale();
+  } else {
+    fireworkField.innerHTML = `${renderQixiFireworks()}${renderQixiFloatingLights()}${renderQixiEmbers()}${renderQixiFinalLights()}`;
+  }
+
+  void fireworkField.offsetWidth;
+  let fireworkActivated = false;
+  const activateFirework = () => {
+    if (fireworkActivated || !fireworkField.isConnected) return;
+    fireworkActivated = true;
+    fireworkField.classList.add('is-active');
+    void fireworkField.offsetWidth;
+
+    const startTime = document.timeline.currentTime;
+    fireworkField.getAnimations({ subtree: true }).forEach((animation) => {
+      animation.startTime = startTime;
+    });
+  };
+  window.clearTimeout(qixiFireworkActivationTimer);
+  qixiFireworkActivationTimer = window.setTimeout(activateFirework, 32);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(activateFirework);
+  });
+
+  window.clearTimeout(qixiHeartStartTimer);
+  qixiHeartStartTimer = window.setTimeout(startQixiHeartFormation, 8700);
+
+  window.clearTimeout(qixiFireworkCleanupTimer);
+  qixiFireworkCleanupTimer = window.setTimeout(() => {
+    dateApp?.classList.remove('is-qixi-grand-finale');
+    dateApp?.classList.add('is-qixi-grand-calm');
+    sceneEffects.classList.remove('is-firework-enhanced', 'is-grand-finale');
+    sceneEffects.classList.add('is-grand-calm');
+    card.classList.remove('is-grand-finale');
+    card.classList.add('is-grand-calm');
+    window.clearTimeout(qixiFireworkActivationTimer);
+    fireworkField.classList.remove('is-active');
+    fireworkField.replaceChildren();
+    card.querySelector('.qixi-final-main')?.classList.remove('is-celebrating');
+    if (qixiHeartFormationComplete) enableQixiInteractiveFinale();
+  }, reduceMotion.matches ? 10000 : 14000);
+}
+
+function handleQixiFinalTap() {
+  if (qixiFireworkTriggered) return;
+
+  hideQixiDiscoveryHint();
+  qixiFinalTapCount += 1;
+  if (qixiFinalTapCount === 1) {
+    setQixiFinalHint('别点啦，真的没有彩蛋了。', 2000);
+    return;
+  }
+  if (qixiFinalTapCount === 2) {
+    setQixiFinalHint('拜托，真的没有了。', 2000);
+    return;
+  }
+
+  qixiFireworkTriggered = true;
+  setQixiFinalHint('好吧好吧……既然你都发现了。');
+  window.clearTimeout(qixiFireworkStartTimer);
+  qixiFireworkStartTimer = window.setTimeout(() => {
+    setQixiFinalHint('那就再送你一场烟花。', 3400);
+    triggerQixiFirework();
+  }, 760);
+}
+
 function renderQixiFinal() {
+  qixiFinalTapCount = 0;
+  qixiFireworkTriggered = false;
+  window.clearTimeout(qixiFinalHintTimer);
+  window.clearTimeout(qixiDiscoveryHintTimer);
+  window.clearTimeout(qixiFireworkStartTimer);
+  window.clearTimeout(qixiFireworkActivationTimer);
+  window.clearTimeout(qixiFireworkCleanupTimer);
+  window.clearTimeout(qixiHeartStartTimer);
+  window.clearTimeout(qixiHeartCompleteTimer);
+  clearQixiInteractiveFinale();
   dateApp?.classList.remove('is-qixi-transitioning');
+  dateApp?.classList.remove('is-qixi-grand-finale', 'is-qixi-grand-calm');
   dateApp?.classList.add('is-qixi-final');
+  stage.dataset.screen = 'qixi-final';
 
   stage.querySelector('.qixi-scene-effects')?.remove();
   const sceneEffects = document.createElement('div');
@@ -754,6 +1301,9 @@ function renderQixiFinal() {
     <div class="qixi-light-field">
       ${renderQixiLightPoints()}
     </div>
+    <div class="qixi-calm-field">
+      ${renderQixiCalmLights()}
+    </div>
   `;
   stage.insertBefore(sceneEffects, card);
 
@@ -761,13 +1311,23 @@ function renderQixiFinal() {
   card.dataset.screen = 'qixi-final';
   card.tabIndex = -1;
   card.innerHTML = `
+    <div class="qixi-final-effect-layer" aria-hidden="true">
+      <div class="qixi-firework-field"></div>
+      <div class="qixi-click-firework-layer"></div>
+    </div>
+    <div class="qixi-heart-particle-layer" aria-hidden="true"></div>
     <div class="qixi-final-message">
       <p class="qixi-final-copy">
         <span class="qixi-final-prefix">好啦，</span>
-        <span class="qixi-final-main">七夕快乐。</span>
+        <button class="qixi-final-main" type="button">七夕快乐。</button>
       </p>
+      <p class="qixi-discovery-hint">好像还可以再点一下。</p>
+      <p class="qixi-final-secret" aria-live="polite"></p>
+      <p class="qixi-blessing-line" aria-live="polite"></p>
     </div>
   `;
+
+  card.querySelector('.qixi-final-main')?.addEventListener('click', handleQixiFinalTap);
 
   window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   card.focus({ preventScroll: true });
@@ -777,6 +1337,11 @@ function renderQixiFinal() {
       card.classList.add('is-visible');
     }),
   );
+
+  qixiDiscoveryHintTimer = window.setTimeout(() => {
+    const discoveryHint = card.querySelector('.qixi-discovery-hint');
+    if (qixiFinalTapCount === 0 && discoveryHint) discoveryHint.classList.add('is-visible');
+  }, 2800);
 }
 
 function openQixiFinal(event) {
@@ -797,6 +1362,7 @@ function triggerEasterEgg() {
 
   window.clearTimeout(easterEggResetTimer);
   easterEggTapCount += 1;
+  animatePaperPlane(easterEggTapCount);
   if (easterEggTapCount < 5) {
     easterEggResetTimer = window.setTimeout(() => {
       easterEggTapCount = 0;
@@ -805,27 +1371,210 @@ function triggerEasterEgg() {
   }
 
   easterEggRevealed = true;
+  const planeButton = document.querySelector('.paper-plane-easter-egg');
+  if (planeButton) planeButton.disabled = true;
+  window.clearTimeout(paperPlaneDepartureTimer);
+  paperPlaneDepartureTimer = window.setTimeout(
+    () => {
+      if (planeButton) planeButton.hidden = true;
+      revealEasterEggCopy();
+    },
+    reduceMotion.matches ? 150 : 460,
+  );
+}
+
+function revealEasterEggCopy() {
+  if (!stage) return;
+
+  easterEggCopyTimers.forEach((timer) => window.clearTimeout(timer));
+  easterEggCopyTimers = [];
   const message = document.createElement('div');
   message.className = 'easter-egg-copy';
   message.setAttribute('aria-live', 'polite');
   message.innerHTML = `
-    <p class="easter-egg-first">你居然真的发现这里了。</p>
-    <p class="easter-egg-second">好吧，这句话本来就是留给你的。</p>
+    <div class="easter-egg-opening">
+      <p class="easter-egg-first">你居然真的发现这里了。</p>
+      <p class="easter-egg-second">好吧，这句话本来就是留给你的。</p>
+    </div>
+    <div class="paper-plane-lock">
+      <p class="paper-plane-lock-copy">不过，后面的话好像还上了锁。</p>
+      <form class="paper-plane-lock-form" novalidate>
+        <label class="sr-only" for="paperPlanePassword">四位数密码</label>
+        <input
+          class="paper-plane-lock-input"
+          id="paperPlanePassword"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="4"
+          autocomplete="off"
+          aria-describedby="paperPlanePasswordHint paperPlanePasswordStatus"
+          placeholder="····"
+        />
+        <button class="paper-plane-unlock-button" type="submit">解锁</button>
+      </form>
+      <p class="paper-plane-lock-hint" id="paperPlanePasswordHint">提示：一个你我都知道的、关于你的四位数。</p>
+      <p class="paper-plane-lock-status" id="paperPlanePasswordStatus" aria-live="polite"></p>
+    </div>
+    <div class="easter-egg-notes">
+      <p class="easter-egg-notes-title">那就再留几句碎碎念吧。</p>
+      <div class="easter-egg-notes-body">
+        ${easterEggNotes
+          .map((note, index) => `<p class="easter-egg-note" data-note-index="${index}">${escapeHtml(note)}</p>`)
+          .join('')}
+      </div>
+    </div>
   `;
   stage.append(message);
 
   const firstLine = message.querySelector('.easter-egg-first');
   const secondLine = message.querySelector('.easter-egg-second');
+  const lock = message.querySelector('.paper-plane-lock');
+  const lockCopy = message.querySelector('.paper-plane-lock-copy');
+  const lockForm = message.querySelector('.paper-plane-lock-form');
+  const passwordInput = message.querySelector('.paper-plane-lock-input');
+  const lockStatus = message.querySelector('.paper-plane-lock-status');
   requestAnimationFrame(() => firstLine?.classList.add('is-visible'));
-  window.setTimeout(
-    () => secondLine?.classList.add('is-visible'),
-    reduceMotion.matches ? 0 : 2200,
+  easterEggCopyTimers.push(
+    window.setTimeout(
+      () => secondLine?.classList.add('is-visible'),
+      reduceMotion.matches ? 0 : 2200,
+    ),
   );
-  window.setTimeout(() => message.remove(), reduceMotion.matches ? 5000 : 7800);
+
+  passwordInput?.addEventListener('input', () => {
+    passwordInput.value = passwordInput.value.replace(/\D/g, '').slice(0, 4);
+    if (!lockStatus?.textContent) return;
+    lockStatus.classList.remove('is-visible');
+    lockStatus.textContent = '';
+  });
+
+  lockForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    unlockPaperPlaneNotes(message);
+  });
+
+  const lockCopyStart = reduceMotion.matches ? 80 : 3400;
+  const lockFormStart = reduceMotion.matches ? 140 : 4100;
+  easterEggCopyTimers.push(
+    window.setTimeout(() => {
+      if (!message.isConnected) return;
+      if (paperPlaneNotesUnlocked) {
+        revealPaperPlaneNotes(message);
+        return;
+      }
+      message.classList.add('is-locking');
+      lockCopy?.classList.add('is-visible');
+    }, lockCopyStart),
+  );
+  easterEggCopyTimers.push(
+    window.setTimeout(() => {
+      if (!message.isConnected || paperPlaneNotesUnlocked) return;
+      lock?.classList.add('is-visible');
+      lockForm?.classList.add('is-visible');
+    }, lockFormStart),
+  );
+}
+
+function unlockPaperPlaneNotes(message) {
+  if (paperPlaneNotesUnlocked || !message?.isConnected) return;
+
+  const input = message.querySelector('.paper-plane-lock-input');
+  const form = message.querySelector('.paper-plane-lock-form');
+  const status = message.querySelector('.paper-plane-lock-status');
+  const lock = message.querySelector('.paper-plane-lock');
+  if (!input || !form || !status || !lock) return;
+
+  const value = input.value.replace(/\D/g, '').slice(0, 4);
+  input.value = value;
+  status.classList.remove('is-visible');
+  if (value !== '1023') {
+    status.textContent = '好像不是这个。';
+    requestAnimationFrame(() => status.classList.add('is-visible'));
+    return;
+  }
+
+  paperPlaneNotesUnlocked = true;
+  [...form.elements].forEach((control) => { control.disabled = true; });
+  status.textContent = '咔哒。好像打开了。';
+  requestAnimationFrame(() => status.classList.add('is-visible'));
+  easterEggCopyTimers.push(
+    window.setTimeout(() => {
+      if (!message.isConnected) return;
+      lock.classList.add('is-unlocking');
+      easterEggCopyTimers.push(
+        window.setTimeout(() => {
+          if (!message.isConnected) return;
+          lock.hidden = true;
+          revealPaperPlaneNotes(message);
+        }, reduceMotion.matches ? 0 : 380),
+      );
+    }, 650),
+  );
+}
+
+function revealPaperPlaneNotes(message) {
+  if (!paperPlaneNotesUnlocked || !message?.isConnected || message.classList.contains('is-expanded')) return;
+
+  const notesTitle = message.querySelector('.easter-egg-notes-title');
+  const notes = [...message.querySelectorAll('.easter-egg-note')];
+  message.classList.remove('is-locking');
+  message.classList.add('is-expanded');
+  dateApp?.classList.add('has-easter-egg-notes');
+  notesTitle?.classList.add('is-visible');
+  easterEggCopyTimers.push(
+    window.setTimeout(
+      () => message.scrollIntoView({ block: 'start', behavior: reduceMotion.matches ? 'auto' : 'smooth' }),
+      reduceMotion.matches ? 0 : 160,
+    ),
+  );
+  notes.forEach((note, index) => {
+    easterEggCopyTimers.push(
+      window.setTimeout(
+        () => note.classList.add('is-visible'),
+        reduceMotion.matches ? 120 + index * 70 : 520 + index * 420,
+      ),
+    );
+  });
+}
+
+function animatePaperPlane(tapCount) {
+  const planeButton = document.querySelector('.paper-plane-easter-egg');
+  const plane = planeButton?.querySelector('.paper-plane-inner');
+  if (!planeButton || !plane) return;
+
+  plane.className = 'paper-plane-inner';
+  void plane.offsetWidth;
+  window.clearTimeout(paperPlaneFeedbackTimer);
+
+  if (reduceMotion.matches) {
+    if (tapCount === 5) {
+      planeButton.classList.add('is-reduced-departing');
+      return;
+    }
+
+    plane.classList.add('is-reduced-feedback');
+    paperPlaneFeedbackTimer = window.setTimeout(
+      () => plane.classList.remove('is-reduced-feedback'),
+      120,
+    );
+    return;
+  }
+
+  plane.classList.add(`is-flight-${Math.min(tapCount, 5)}`);
+  if (tapCount < 5) {
+    const flightDurations = [0, 210, 220, 210, 230];
+    paperPlaneFeedbackTimer = window.setTimeout(
+      () => {
+        if (!easterEggRevealed) plane.className = 'paper-plane-inner';
+      },
+      flightDurations[tapCount] + 20,
+    );
+  }
 }
 
 function bindEasterEgg() {
-  document.querySelector('.botanical-hit-area')?.addEventListener('pointerup', triggerEasterEgg);
+  document.querySelector('.paper-plane-easter-egg')?.addEventListener('click', triggerEasterEgg);
 }
 
 function showSubmitFeedback(event) {
@@ -1050,6 +1799,7 @@ function getNextScreenIndex() {
 
 function render() {
   const screen = getCurrentScreen();
+  stage.dataset.screen = screen.id;
   card.className = 'invitation-card';
   card.dataset.screen = screen.kind;
   card.tabIndex = -1;
@@ -1698,6 +2448,7 @@ function showOutcome(type) {
   card.classList.add('is-leaving');
 
   window.setTimeout(() => {
+    stage.dataset.screen = 'outcome';
     card.className = 'invitation-card outcome-card';
     card.dataset.screen = 'outcome';
     card.innerHTML = `
@@ -1726,5 +2477,6 @@ function showOutcome(type) {
 }
 
 bindEasterEgg();
+bindQixiFinaleInteraction();
 saveState();
 render();
