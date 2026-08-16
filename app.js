@@ -28,9 +28,10 @@ const qixiTracks = [
   },
 ];
 let currentTrackIndex = 0;
-const qixiMusic = new Audio(qixiTracks[currentTrackIndex].src);
+const qixiMusic = new Audio();
 
-qixiMusic.preload = 'metadata';
+qixiMusic.preload = 'none';
+qixiMusic.autoplay = false;
 qixiMusic.volume = 0.3;
 qixiMusic.loop = false;
 
@@ -453,6 +454,8 @@ let qixiInteractiveFinaleReady = false;
 let qixiHeartFormationComplete = false;
 let qixiFinalePointerStart = null;
 let qixiLastInteractiveFireworkAt = 0;
+let qixiInteractiveHintTimer = null;
+let qixiFinalHintDismissed = false;
 let qixiBlessingBag = [];
 let qixiLastBlessing = '';
 let qixiBlessingSwapTimer = null;
@@ -473,7 +476,7 @@ function formatText(value) {
 }
 
 function isQixiMusicPlaying() {
-  return !qixiMusic.paused && !qixiMusic.ended;
+  return !qixiMusicLoadFailed && !qixiMusic.paused && !qixiMusic.ended;
 }
 
 function getCurrentQixiTrack() {
@@ -593,12 +596,16 @@ async function toggleQixiMusic() {
   qixiMusicTogglePending = true;
 
   try {
-    await qixiMusic.play();
+    if (!qixiMusic.getAttribute('src') || qixiMusic.error) {
+      qixiMusic.src = getCurrentQixiTrack().src;
+    }
+    const playPromise = qixiMusic.play();
+    if (playPromise) await playPromise;
     qixiMusicHasStarted = true;
     qixiMusicLoadFailed = false;
-  } catch (error) {
+  } catch {
     qixiMusicLoadFailed = true;
-    console.error(`《${getCurrentQixiTrack().title}》播放失败。`, error);
+    qixiMusic.pause();
   } finally {
     qixiMusicTogglePending = false;
     syncMusicRecords();
@@ -636,9 +643,9 @@ async function selectQixiTrack(nextTrackIndex) {
     await qixiMusic.play();
     qixiMusicHasStarted = true;
     qixiMusicLoadFailed = false;
-  } catch (error) {
+  } catch {
     qixiMusicLoadFailed = true;
-    console.error(`《${getCurrentQixiTrack().title}》播放失败。`, error);
+    qixiMusic.pause();
   } finally {
     qixiMusicTogglePending = false;
     syncMusicRecords();
@@ -680,7 +687,7 @@ function bindMusicRecords() {
   syncMusicRecords();
 }
 
-qixiMusic.addEventListener('play', () => {
+qixiMusic.addEventListener('playing', () => {
   qixiMusicHasStarted = true;
   qixiMusicLoadFailed = false;
   syncMusicRecords();
@@ -689,6 +696,7 @@ qixiMusic.addEventListener('pause', syncMusicRecords);
 qixiMusic.addEventListener('ended', syncMusicRecords);
 qixiMusic.addEventListener('error', () => {
   qixiMusicLoadFailed = true;
+  qixiMusic.pause();
   syncMusicRecords();
 });
 
@@ -971,10 +979,50 @@ function renderQixiHeartParticles() {
 }
 
 function enableQixiInteractiveFinale() {
-  if (!qixiHeartFormationComplete || card.dataset.screen !== 'qixi-final') return;
+  if (
+    qixiInteractiveFinaleReady ||
+    !qixiHeartFormationComplete ||
+    card.dataset.screen !== 'qixi-final'
+  ) {
+    return;
+  }
   qixiInteractiveFinaleReady = true;
   dateApp?.classList.add('is-qixi-interactive-ready');
   card.classList.add('is-interactive-ready');
+  scheduleQixiInteractiveHint();
+}
+
+function scheduleQixiInteractiveHint() {
+  window.clearTimeout(qixiInteractiveHintTimer);
+  if (qixiFinalHintDismissed) return;
+
+  qixiInteractiveHintTimer = window.setTimeout(() => {
+    if (
+      qixiFinalHintDismissed ||
+      !qixiInteractiveFinaleReady ||
+      card.dataset.screen !== 'qixi-final'
+    ) {
+      return;
+    }
+
+    const hint = card.querySelector('.qixi-interactive-hint');
+    if (!hint) return;
+    hint.hidden = false;
+    void hint.offsetWidth;
+    if (!qixiFinalHintDismissed && hint.isConnected) hint.classList.add('is-visible');
+  }, 1100);
+}
+
+function dismissQixiInteractiveHint() {
+  qixiFinalHintDismissed = true;
+  window.clearTimeout(qixiInteractiveHintTimer);
+  const hint = card.querySelector('.qixi-interactive-hint');
+  if (!hint) return;
+
+  hint.classList.remove('is-visible');
+  qixiInteractiveHintTimer = window.setTimeout(() => {
+    if (hint.isConnected) hint.hidden = true;
+  }, reduceMotion.matches ? 0 : 200);
 }
 
 function startQixiHeartFormation() {
@@ -1026,6 +1074,7 @@ function clearQixiInteractiveFinale() {
   qixiInteractiveFireworks.clear();
   window.clearTimeout(qixiBlessingSwapTimer);
   window.clearTimeout(qixiBlessingFadeTimer);
+  window.clearTimeout(qixiInteractiveHintTimer);
   qixiInteractiveFinaleReady = false;
   qixiHeartFormationComplete = false;
   qixiFinalePointerStart = null;
@@ -1130,6 +1179,7 @@ function createQixiInteractiveFirework(clientX, clientY) {
     reduceMotion.matches ? 820 : 1380,
   );
   qixiInteractiveFireworks.set(firework, cleanupTimer);
+  dismissQixiInteractiveHint();
   showQixiBlessing();
   return true;
 }
@@ -1323,6 +1373,7 @@ function renderQixiFinal() {
       </p>
       <p class="qixi-discovery-hint">好像还可以再点一下。</p>
       <p class="qixi-final-secret" aria-live="polite"></p>
+      <p class="qixi-interactive-hint" aria-hidden="true" hidden>点点看</p>
       <p class="qixi-blessing-line" aria-live="polite"></p>
     </div>
   `;
@@ -1867,7 +1918,14 @@ function renderOpening() {
       title="播放 / 暂停《碎碎念》"
     >
       <span class="music-record-disc">
-        <img class="sand-heart-image" src="assets/sand-heart.jpg" alt="沙地上的爱心" />
+        <img
+          class="sand-heart-image"
+          src="assets/sand-heart-web.jpg"
+          width="540"
+          height="720"
+          decoding="async"
+          alt="沙地上的爱心"
+        />
       </span>
     </figure>
     <div class="music-meta">
@@ -2202,7 +2260,14 @@ function renderInvitation() {
       title="播放 / 暂停《碎碎念》"
     >
       <span class="music-record-disc">
-        <img class="sand-heart-image" src="assets/sand-heart.jpg" alt="" />
+        <img
+          class="sand-heart-image"
+          src="assets/sand-heart-web.jpg"
+          width="540"
+          height="720"
+          decoding="async"
+          alt=""
+        />
       </span>
     </figure>
   `;
@@ -2466,7 +2531,14 @@ function showOutcome(type) {
         title="播放 / 暂停《碎碎念》"
       >
         <span class="music-record-disc">
-          <img class="sand-heart-image" src="assets/sand-heart.jpg" alt="" />
+          <img
+            class="sand-heart-image"
+            src="assets/sand-heart-web.jpg"
+            width="540"
+            height="720"
+            decoding="async"
+            alt=""
+          />
         </span>
       </figure>
     `;

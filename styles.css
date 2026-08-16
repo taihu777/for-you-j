@@ -1747,6 +1747,31 @@ button:focus-visible {
   transition: opacity 260ms var(--ease-standard), transform 360ms var(--ease-out);
 }
 
+.qixi-interactive-hint {
+  position: absolute;
+  top: calc(100% + 36px);
+  left: 50%;
+  width: min(84vw, 320px);
+  margin: 0;
+  color: rgba(249, 239, 220, 0.64);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.7;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  transform: translate3d(-50%, 3px, 0);
+  transition: opacity 180ms var(--ease-standard), transform 220ms var(--ease-out);
+}
+
+.qixi-interactive-hint[hidden] { display: none; }
+
+.qixi-interactive-hint.is-visible {
+  opacity: 0.62;
+  transform: translate3d(-50%, 0, 0);
+}
+
 .qixi-blessing-line.is-visible {
   opacity: 0.86;
   transform: translate3d(-50%, 0, 0);
@@ -2538,6 +2563,7 @@ button:focus-visible {
   .qixi-click-spark:nth-child(3n) { width: 6px; height: 6px; }
   .qixi-click-spark::after { width: 7px; }
   .qixi-blessing-line { top: calc(100% + 34px); width: min(88vw, 360px); font-size: 0.73rem; }
+  .qixi-interactive-hint { top: calc(100% + 34px); width: min(88vw, 320px); }
 
   .review-answer-row {
     align-items: flex-start;
