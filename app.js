@@ -6,7 +6,7 @@ const qixiTracks = [
     id: 'sui-sui-nian',
     title: '碎碎念',
     artist: '队长',
-    src: 'assets/music/1-sui-sui-nian.mp3',
+    src: 'https://taihu777.oss-cn-hangzhou.aliyuncs.com/1-sui-sui-nian.mp3',
   },
   {
     id: 'hong-zhi-jian',
